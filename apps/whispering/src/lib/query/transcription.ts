@@ -217,6 +217,8 @@ async function transcribeBlob(
 							temperature: settings.value['transcription.temperature'],
 							apiKey: settings.value['apiKeys.deepgram'],
 							modelName: settings.value['transcription.deepgram.model'],
+							mipOptOut:
+								settings.value['transcription.deepgram.modelImprovementProgramOptOut'],
 						},
 					);
 				case 'whispercpp':

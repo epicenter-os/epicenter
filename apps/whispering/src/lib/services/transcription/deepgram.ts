@@ -72,6 +72,7 @@ export function createDeepgramTranscriptionService({
                 outputLanguage: Settings['transcription.outputLanguage'];
                 apiKey: string;
                 modelName: (string & {}) | DeepgramModel['name'];
+                mipOptOut?: boolean;
             },
         ): Promise<Result<string, WhisperingError>> {
             // Pre-validation: Check API key
@@ -111,6 +112,10 @@ export function createDeepgramTranscriptionService({
             
             if (options.prompt) {
                 params.append('keywords', options.prompt);
+            }
+
+            if (options.mipOptOut === true) {
+                params.append('mip_opt_out', 'true');
             }
 
             // Send raw audio data directly as recommended by Deepgram docs
