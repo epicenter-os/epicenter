@@ -1,0 +1,66 @@
+{
+	"build": {
+		"beforeBuildCommand": "bun run build",
+		"beforeDevCommand": "bun run dev:web",
+		"frontendDist": "../build",
+		"devUrl": "http://localhost:1420"
+	},
+	"bundle": {
+		"active": true,
+		"category": "Productivity",
+		"targets": "all",
+		"icon": [
+			"icons/32x32.png",
+			"icons/128x128.png",
+			"icons/128x128@2x.png",
+			"icons/icon.icns",
+			"icons/icon.ico"
+		],
+		"longDescription": "Seamlessly integrate speech-to-text transcriptions anywhere on your desktop. Powered by OpenAI's Whisper API.",
+		"shortDescription": "Press shortcut → speak → get text. Free and open source ❤️",
+		"createUpdaterArtifacts": true,
+		"macOS": {
+			"entitlements": "entitlements.plist",
+			"hardenedRuntime": true,
+			"minimumSystemVersion": "15.5",
+			"signingIdentity": "Developer ID Application: Braden Wong (3C7J97QA5Z)"
+		},
+		"linux": {
+			"appimage": {
+				"bundleMediaFramework": true
+			}
+		},
+		"windows": {
+			"webviewInstallMode": {
+				"type": "downloadBootstrapper"
+			}
+		}
+	},
+	"productName": "Whispering",
+	"version": "7.4.0",
+	"identifier": "com.bradenwong.whispering",
+	"plugins": {
+		"updater": {
+			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDUwQzE1RjEyRThENzg0OEEKUldTS2hOZm9FbC9CVU1uZ1JLWlluMm1mOHd4N1RWUkNjME9PcHA3Nkg2ek5RMnZyVTVDS2k1QkwK",
+			"endpoints": [
+				"https://github.com/epicenter-so/epicenter/releases/latest/download/latest.json"
+			]
+		}
+	},
+	"app": {
+		"macOSPrivateApi": true,
+		"windows": [
+			{
+				"resizable": true,
+				"title": "Whispering",
+				"width": 1080,
+				"height": 800,
+				"minHeight": 84,
+				"minWidth": 72
+			}
+		],
+		"security": {
+			"csp": null
+		}
+	}
+}
