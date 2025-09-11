@@ -232,9 +232,9 @@ export const settingsSchema = z.object({
 			.string()
 			.nullable()
 			.default(`${CommandOrAlt}+Shift+D`),
-		'shortcuts.global.setOutputLanguageSlot1': z.string().nullable().default(null),
-		'shortcuts.global.setOutputLanguageSlot2': z.string().nullable().default(null),
-		'shortcuts.global.setOutputLanguageSlot3': z.string().nullable().default(null),
+		'shortcuts.global.setOutputLanguageSlot1': z.string().nullable().default('Shift+F1'),
+		'shortcuts.global.setOutputLanguageSlot2': z.string().nullable().default('Shift+F2'),
+		'shortcuts.global.setOutputLanguageSlot3': z.string().nullable().default('Shift+F3'),
 		'shortcuts.global.startManualRecording': z
 			.string()
 			.nullable()
