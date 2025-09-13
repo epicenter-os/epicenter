@@ -20,7 +20,7 @@ export function createAnthropicCompletionService(): CompletionService {
 						messages: [{ role: 'user', content: userPrompt }],
 						max_tokens: 1024,
 					}),
-				mapErr: (error) => {
+				catch: (error) => {
 					// Check if it's NOT an Anthropic API error
 					if (!(error instanceof Anthropic.APIError)) {
 						// This is an unexpected error type

@@ -11,6 +11,7 @@ import {
 export function registerOnboarding() {
 	const selectedService = getSelectedTranscriptionService();
 
+	// Check transcription service configuration
 	if (!selectedService) {
 		rpc.notify.info.execute({
 			title: 'Welcome to Whispering!',
@@ -26,10 +27,13 @@ export function registerOnboarding() {
 	}
 
 	if (!isTranscriptionServiceConfigured(selectedService)) {
-		const missingConfig =
-			selectedService.type === 'api'
-				? `${selectedService.name} API key`
-				: `${selectedService.name} server URL`;
+		const missingConfig = (
+			{
+				cloud: `${selectedService.name} API key`,
+				'self-hosted': `${selectedService.name} server URL`,
+				local: `${selectedService.name} model file`,
+			} as const
+		)[selectedService.location];
 
 		rpc.notify.info.execute({
 			title: 'Welcome to Whispering!',

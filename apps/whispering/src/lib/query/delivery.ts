@@ -3,22 +3,22 @@ import { settings } from '$lib/stores/settings.svelte';
 import { Ok } from 'wellcrafted/result';
 import { defineMutation } from './_client';
 import { rpc } from './index';
-import type { ClipboardServiceError } from '$lib/services/clipboard';
+import type { TextServiceError } from '$lib/services/text';
 import type { WhisperingError } from '$lib/result';
 
 export const delivery = {
 	/**
-	 * Delivers transcribed text to the user according to their clipboard preferences.
+	 * Delivers transcribed text to the user according to their text output preferences.
 	 *
 	 * This mutation handles the complete delivery workflow for transcription results:
 	 * 1. Shows a success toast with the transcribed text
 	 * 2. Optionally copies text to clipboard based on user settings
-	 * 3. Optionally pastes text at cursor based on user settings
+	 * 3. Optionally writes text to cursor based on user settings
 	 * 4. Provides fallback UI actions when automatic operations fail
 	 *
 	 * The user's preferences are read from:
-	 * - `transcription.clipboard.copyOnSuccess` - Whether to auto-copy
-	 * - `transcription.clipboard.pasteOnSuccess` - Whether to auto-paste
+	 * - `transcription.copyToClipboardOnSuccess` - Whether to auto-copy
+	 * - `transcription.writeToCursorOnSuccess` - Whether to auto-write to cursor
 	 *
 	 * @param text - The transcribed text to deliver
 	 * @param toastId - Unique ID for toast notifications to prevent duplicates
@@ -42,6 +42,10 @@ export const delivery = {
 			text: string;
 			toastId: string;
 		}) => {
+			// Track what operations succeeded
+			let copied = false;
+			let written = false;
+
 			// Shows transcription result and offers manual copy action
 			const offerManualCopy = () =>
 				rpc.notify.success.execute({
@@ -52,7 +56,7 @@ export const delivery = {
 						type: 'button',
 						label: 'Copy to clipboard',
 						onClick: async () => {
-							const { error } = await rpc.clipboard.copyToClipboard.execute({
+							const { error } = await rpc.text.copyToClipboard.execute({
 								text,
 							});
 							if (error) {
@@ -74,8 +78,8 @@ export const delivery = {
 					},
 				});
 
-			// Warns that automatic copy failed and falls back to manual option
-			const warnAutoCopyFailed = (error: ClipboardServiceError) => {
+			// Warns that automatic copy failed
+			const warnAutoCopyFailed = (error: TextServiceError) => {
 				rpc.notify.warning.execute({
 					title: "Couldn't copy to clipboard",
 					description: error.message,
@@ -83,26 +87,13 @@ export const delivery = {
 				});
 			};
 
-			// Confirms text is in clipboard (when paste is not attempted)
-			const confirmTextInClipboard = () =>
-				rpc.notify.success.execute({
-					id: toastId,
-					title: '📝 Recording transcribed and copied to clipboard!',
-					description: text,
-					action: {
-						type: 'link',
-						label: 'Go to recordings',
-						href: WHISPERING_RECORDINGS_PATHNAME,
-					},
-				});
-
-			// Warns that paste failed but confirms copy succeeded
-			const warnPasteFailedButCopied = (
-				error: ClipboardServiceError | WhisperingError,
+			// Warns that write to cursor failed
+			const warnWriteToCursorFailed = (
+				error: TextServiceError | WhisperingError,
 			) => {
-				if (error.name === 'ClipboardServiceError') {
+				if (error.name === 'TextServiceError') {
 					rpc.notify.warning.execute({
-						title: 'Unable to paste automatically',
+						title: 'Unable to write to cursor automatically',
 						description: error.message,
 						action: { type: 'more-details', error },
 					});
@@ -114,70 +105,95 @@ export const delivery = {
 				}
 			};
 
-			// Confirms complete delivery (both copy and paste succeeded)
-			const confirmFullDelivery = () =>
-				rpc.notify.success.execute({
-					id: toastId,
-					title: '📝 Recording transcribed, copied to clipboard, and pasted!',
-					description: text,
-					action: {
-						type: 'link',
-						label: 'Go to recordings',
-						href: WHISPERING_RECORDINGS_PATHNAME,
-					},
+			// Show appropriate success notification based on what succeeded
+			const showSuccessNotification = () => {
+				if (copied && written) {
+					// Both operations succeeded
+					rpc.notify.success.execute({
+						id: toastId,
+						title: '📝 Recording transcribed, copied to clipboard, and written to cursor!',
+						description: text,
+						action: {
+							type: 'link',
+							label: 'Go to recordings',
+							href: WHISPERING_RECORDINGS_PATHNAME,
+						},
+					});
+				} else if (copied) {
+					// Only copy succeeded
+					rpc.notify.success.execute({
+						id: toastId,
+						title: '📝 Recording transcribed and copied to clipboard!',
+						description: text,
+						action: {
+							type: 'link',
+							label: 'Go to recordings',
+							href: WHISPERING_RECORDINGS_PATHNAME,
+						},
+					});
+				} else if (written) {
+					// Only write succeeded
+					rpc.notify.success.execute({
+						id: toastId,
+						title: '📝 Recording transcribed and written to cursor!',
+						description: text,
+						action: {
+							type: 'link',
+							label: 'Go to recordings',
+							href: WHISPERING_RECORDINGS_PATHNAME,
+						},
+					});
+				} else {
+					// Neither succeeded, offer manual copy
+					offerManualCopy();
+				}
+			};
+
+			// Main delivery flow - operations are independent
+
+			// Check if user wants to copy to clipboard
+			if (settings.value['transcription.copyToClipboardOnSuccess']) {
+				const { error: copyError } = await rpc.text.copyToClipboard.execute({
+					text,
 				});
-
-			// Main delivery flow
-
-			// If user doesn't want auto-copy, just show the result with manual option
-			if (!settings.value['transcription.clipboard.copyOnSuccess']) {
-				offerManualCopy();
-				return Ok(undefined);
+				if (!copyError) {
+					copied = true;
+				} else {
+					warnAutoCopyFailed(copyError);
+				}
 			}
 
-			// Try to copy to clipboard
-			const { error: copyError } = await rpc.clipboard.copyToClipboard.execute({
-				text,
-			});
-			if (copyError) {
-				warnAutoCopyFailed(copyError);
-				offerManualCopy();
-				return Ok(undefined);
+			// Check if user wants to write to cursor (independent of copy)
+			if (settings.value['transcription.writeToCursorOnSuccess']) {
+				const { error: writeError } = await rpc.text.writeToCursor.execute({
+					text,
+				});
+				if (!writeError) {
+					written = true;
+				} else {
+					warnWriteToCursorFailed(writeError);
+				}
 			}
 
-			// If user doesn't want auto-paste, confirm copy only
-			if (!settings.value['transcription.clipboard.pasteOnSuccess']) {
-				confirmTextInClipboard();
-				return Ok(undefined);
-			}
+			// Show appropriate notification
+			showSuccessNotification();
 
-			// Try to paste at cursor
-			const { error: pasteError } =
-				await rpc.clipboard.pasteFromClipboard.execute(undefined);
-			if (pasteError) {
-				warnPasteFailedButCopied(pasteError);
-				confirmTextInClipboard();
-				return Ok(undefined);
-			}
-
-			// Everything succeeded
-			confirmFullDelivery();
 			return Ok(undefined);
 		},
 	}),
 
 	/**
-	 * Delivers transformed text to the user according to their clipboard preferences.
+	 * Delivers transformed text to the user according to their text output preferences.
 	 *
 	 * This mutation handles the complete delivery workflow for transformation results:
 	 * 1. Shows a success toast with the transformed text
 	 * 2. Optionally copies text to clipboard based on user settings
-	 * 3. Optionally pastes text at cursor based on user settings
+	 * 3. Optionally writes text to cursor based on user settings
 	 * 4. Provides fallback UI actions when automatic operations fail
 	 *
 	 * The user's preferences are read from:
-	 * - `transformation.clipboard.copyOnSuccess` - Whether to auto-copy
-	 * - `transformation.clipboard.pasteOnSuccess` - Whether to auto-paste
+	 * - `transformation.copyToClipboardOnSuccess` - Whether to auto-copy
+	 * - `transformation.writeToCursorOnSuccess` - Whether to auto-write to cursor
 	 *
 	 * @param text - The transformed text to deliver
 	 * @param toastId - Unique ID for toast notifications to prevent duplicates
@@ -201,7 +217,9 @@ export const delivery = {
 			text: string;
 			toastId: string;
 		}) => {
-			// Define all notification functions at the top for clarity
+			// Track what operations succeeded
+			let copied = false;
+			let written = false;
 
 			// Shows transformation result and offers manual copy action
 			const offerManualCopy = () =>
@@ -213,7 +231,7 @@ export const delivery = {
 						type: 'button',
 						label: 'Copy to clipboard',
 						onClick: async () => {
-							const { error } = await rpc.clipboard.copyToClipboard.execute({
+							const { error } = await rpc.text.copyToClipboard.execute({
 								text,
 							});
 							if (error) {
@@ -235,8 +253,8 @@ export const delivery = {
 					},
 				});
 
-			// Warns that automatic copy failed and falls back to manual option
-			const warnAutoCopyFailed = (error: ClipboardServiceError) => {
+			// Warns that automatic copy failed
+			const warnAutoCopyFailed = (error: TextServiceError) => {
 				rpc.notify.warning.execute({
 					title: "Couldn't copy to clipboard",
 					description: error.message,
@@ -244,26 +262,13 @@ export const delivery = {
 				});
 			};
 
-			// Confirms text is in clipboard (when paste is not attempted)
-			const confirmTextInClipboard = () =>
-				rpc.notify.success.execute({
-					id: toastId,
-					title: '🔄 Transformation complete and copied to clipboard!',
-					description: text,
-					action: {
-						type: 'link',
-						label: 'Go to recordings',
-						href: WHISPERING_RECORDINGS_PATHNAME,
-					},
-				});
-
-			// Warns that paste failed but confirms copy succeeded
-			const warnPasteFailedButCopied = (
-				error: ClipboardServiceError | WhisperingError,
+			// Warns that write to cursor failed
+			const warnWriteToCursorFailed = (
+				error: TextServiceError | WhisperingError,
 			) => {
-				if (error.name === 'ClipboardServiceError') {
+				if (error.name === 'TextServiceError') {
 					rpc.notify.error.execute({
-						title: 'Error pasting transformed text to cursor',
+						title: 'Error writing transformed text to cursor',
 						description: error.message,
 						action: { type: 'more-details', error },
 					});
@@ -275,54 +280,79 @@ export const delivery = {
 				}
 			};
 
-			// Confirms complete delivery (both copy and paste succeeded)
-			const confirmFullDelivery = () =>
-				rpc.notify.success.execute({
-					id: toastId,
-					title: '🔄 Transformation complete, copied to clipboard, and pasted!',
-					description: text,
-					action: {
-						type: 'link',
-						label: 'Go to recordings',
-						href: WHISPERING_RECORDINGS_PATHNAME,
-					},
+			// Show appropriate success notification based on what succeeded
+			const showSuccessNotification = () => {
+				if (copied && written) {
+					// Both operations succeeded
+					rpc.notify.success.execute({
+						id: toastId,
+						title: '🔄 Transformation complete, copied to clipboard, and written to cursor!',
+						description: text,
+						action: {
+							type: 'link',
+							label: 'Go to recordings',
+							href: WHISPERING_RECORDINGS_PATHNAME,
+						},
+					});
+				} else if (copied) {
+					// Only copy succeeded
+					rpc.notify.success.execute({
+						id: toastId,
+						title: '🔄 Transformation complete and copied to clipboard!',
+						description: text,
+						action: {
+							type: 'link',
+							label: 'Go to recordings',
+							href: WHISPERING_RECORDINGS_PATHNAME,
+						},
+					});
+				} else if (written) {
+					// Only write succeeded
+					rpc.notify.success.execute({
+						id: toastId,
+						title: '🔄 Transformation complete and written to cursor!',
+						description: text,
+						action: {
+							type: 'link',
+							label: 'Go to recordings',
+							href: WHISPERING_RECORDINGS_PATHNAME,
+						},
+					});
+				} else {
+					// Neither succeeded, offer manual copy
+					offerManualCopy();
+				}
+			};
+
+			// Main delivery flow - operations are independent
+
+			// Check if user wants to copy to clipboard
+			if (settings.value['transformation.copyToClipboardOnSuccess']) {
+				const { error: copyError } = await rpc.text.copyToClipboard.execute({
+					text,
 				});
-
-			// Main delivery flow
-
-			// If user doesn't want auto-copy, just show the result with manual option
-			if (!settings.value['transformation.clipboard.copyOnSuccess']) {
-				offerManualCopy();
-				return Ok(undefined);
+				if (!copyError) {
+					copied = true;
+				} else {
+					warnAutoCopyFailed(copyError);
+				}
 			}
 
-			// Try to copy to clipboard
-			const { error: copyError } = await rpc.clipboard.copyToClipboard.execute({
-				text,
-			});
-			if (copyError) {
-				warnAutoCopyFailed(copyError);
-				offerManualCopy();
-				return Ok(undefined);
+			// Check if user wants to write to cursor (independent of copy)
+			if (settings.value['transformation.writeToCursorOnSuccess']) {
+				const { error: writeError } = await rpc.text.writeToCursor.execute({
+					text,
+				});
+				if (!writeError) {
+					written = true;
+				} else {
+					warnWriteToCursorFailed(writeError);
+				}
 			}
 
-			// If user doesn't want auto-paste, confirm copy only
-			if (!settings.value['transformation.clipboard.pasteOnSuccess']) {
-				confirmTextInClipboard();
-				return Ok(undefined);
-			}
+			// Show appropriate notification
+			showSuccessNotification();
 
-			// Try to paste at cursor
-			const { error: pasteError } =
-				await rpc.clipboard.pasteFromClipboard.execute(undefined);
-			if (pasteError) {
-				warnPasteFailedButCopied(pasteError);
-				confirmTextInClipboard();
-				return Ok(undefined);
-			}
-
-			// Everything succeeded
-			confirmFullDelivery();
 			return Ok(undefined);
 		},
 	}),

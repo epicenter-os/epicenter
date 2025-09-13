@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import WhisperingButton from '$lib/components/WhisperingButton.svelte';
 	import { GithubIcon } from '$lib/components/icons';
 	import * as DropdownMenu from '@repo/ui/dropdown-menu';
@@ -38,6 +39,7 @@
 			icon: SettingsIcon,
 			type: 'anchor',
 			href: '/settings',
+			activePathPrefix: '/settings',
 		},
 		{
 			label: 'View project on GitHub',
@@ -73,6 +75,7 @@
 		type: 'anchor';
 		href: string;
 		external?: boolean;
+		activePathPrefix?: string;
 	};
 
 	type ButtonItem = BaseNavItem & {
@@ -86,6 +89,14 @@
 	};
 
 	type NavItem = AnchorItem | ButtonItem | ThemeItem;
+
+	const isItemActive = (item: AnchorItem) => {
+		if (item.external) return false;
+		if (item.activePathPrefix) {
+			return page.url.pathname.startsWith(item.activePathPrefix);
+		}
+		return page.url.pathname === item.href;
+	};
 </script>
 
 {#if collapsed}
@@ -107,13 +118,17 @@
 			{#each navItems as item}
 				{@const Icon = item.icon}
 				{#if item.type === 'anchor'}
+					{@const isActive = isItemActive(item)}
 					<DropdownMenu.Item>
 						{#snippet child({ props })}
 							<a
 								href={item.href}
 								target={item.external ? '_blank' : undefined}
 								rel={item.external ? 'noopener noreferrer' : undefined}
-								class="flex items-center gap-2"
+								class={cn(
+									'flex items-center gap-2',
+									isActive && 'bg-accent text-accent-foreground',
+								)}
 								{...props}
 							>
 								<Icon class="size-4" aria-hidden="true" />
@@ -156,13 +171,15 @@
 		{#each navItems as item}
 			{@const Icon = item.icon}
 			{#if item.type === 'anchor'}
+				{@const isActive = isItemActive(item)}
 				<WhisperingButton
 					tooltipContent={item.label}
 					href={item.href}
 					target={item.external ? '_blank' : undefined}
 					rel={item.external ? 'noopener noreferrer' : undefined}
-					variant="ghost"
+					variant={isActive ? 'secondary' : 'ghost'}
 					size="icon"
+					class={isActive ? 'ring-2 ring-ring/20' : ''}
 				>
 					<Icon class="size-4" aria-hidden="true" />
 				</WhisperingButton>

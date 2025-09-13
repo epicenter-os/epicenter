@@ -27,7 +27,7 @@ export const auth = (env: CloudflareEnv) => {
 								})
 								.where(eq(assistantConfig.userId, anonymousUser.user.id));
 						},
-						mapErr: (error) =>
+						catch: (error) =>
 							Err(
 								`Failed to migrate assistant configs: ${extractErrorMessage(error)}`,
 							),

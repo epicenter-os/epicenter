@@ -24,43 +24,41 @@
 	<Separator />
 
 	<LabeledSwitch
-		id="transcription.clipboard.copyOnSuccess"
-		label="Copy text to clipboard on successful transcription"
-		checked={settings.value['transcription.clipboard.copyOnSuccess']}
-		onCheckedChange={(v) => {
-			settings.updateKey('transcription.clipboard.copyOnSuccess', v);
-		}}
+		id="transcription.copyToClipboardOnSuccess"
+		label="Copy transcribed text to clipboard"
+		bind:checked={
+			() => settings.value['transcription.copyToClipboardOnSuccess'],
+			(v) => settings.updateKey('transcription.copyToClipboardOnSuccess', v)
+		}
 	/>
 
 	<LabeledSwitch
-		id="transcription.clipboard.pasteOnSuccess"
-		label="Paste contents from clipboard after successful transcription"
-		checked={settings.value['transcription.clipboard.pasteOnSuccess']}
-		onCheckedChange={(v) => {
-			settings.updateKey('transcription.clipboard.pasteOnSuccess', v);
-		}}
-		disabled={!settings.value['transcription.clipboard.copyOnSuccess']}
+		id="transcription.writeToCursorOnSuccess"
+		label="Paste transcribed text at cursor"
+		bind:checked={
+			() => settings.value['transcription.writeToCursorOnSuccess'],
+			(v) => settings.updateKey('transcription.writeToCursorOnSuccess', v)
+		}
 	/>
 
 	<Separator />
 
 	<LabeledSwitch
-		id="transformation.clipboard.copyOnSuccess"
-		label="Copy text to clipboard on successful transformation"
-		checked={settings.value['transformation.clipboard.copyOnSuccess']}
-		onCheckedChange={(v) => {
-			settings.updateKey('transformation.clipboard.copyOnSuccess', v);
-		}}
+		id="transformation.copyToClipboardOnSuccess"
+		label="Copy transformed text to clipboard"
+		bind:checked={
+			() => settings.value['transformation.copyToClipboardOnSuccess'],
+			(v) => settings.updateKey('transformation.copyToClipboardOnSuccess', v)
+		}
 	/>
 
 	<LabeledSwitch
-		id="transformation.clipboard.pasteOnSuccess"
-		label="Paste contents from clipboard after successful transformation"
-		checked={settings.value['transformation.clipboard.pasteOnSuccess']}
-		onCheckedChange={(v) => {
-			settings.updateKey('transformation.clipboard.pasteOnSuccess', v);
-		}}
-		disabled={!settings.value['transformation.clipboard.copyOnSuccess']}
+		id="transformation.writeToCursorOnSuccess"
+		label="Paste transformed text at cursor"
+		bind:checked={
+			() => settings.value['transformation.writeToCursorOnSuccess'],
+			(v) => settings.updateKey('transformation.writeToCursorOnSuccess', v)
+		}
 	/>
 
 	<Separator />
@@ -72,10 +70,10 @@
 			{ value: 'keep-forever', label: 'Keep All Recordings' },
 			{ value: 'limit-count', label: 'Keep Limited Number' },
 		] as const}
-		selected={settings.value['database.recordingRetentionStrategy']}
-		onSelectedChange={(selected) => {
-			settings.updateKey('database.recordingRetentionStrategy', selected);
-		}}
+		bind:selected={
+			() => settings.value['database.recordingRetentionStrategy'],
+			(selected) => settings.updateKey('database.recordingRetentionStrategy', selected)
+		}
 		placeholder="Select retention strategy"
 	/>
 
@@ -84,16 +82,17 @@
 			id="max-recording-count"
 			label="Maximum Recordings"
 			items={[
+				{ value: '0', label: '0 Recordings (Never Save)' },
 				{ value: '5', label: '5 Recordings' },
 				{ value: '10', label: '10 Recordings' },
 				{ value: '25', label: '25 Recordings' },
 				{ value: '50', label: '50 Recordings' },
 				{ value: '100', label: '100 Recordings' },
 			]}
-			selected={settings.value['database.maxRecordingCount']}
-			onSelectedChange={(selected) => {
-				settings.updateKey('database.maxRecordingCount', selected);
-			}}
+			bind:selected={
+				() => settings.value['database.maxRecordingCount'],
+				(selected) => settings.updateKey('database.maxRecordingCount', selected)
+			}
 			placeholder="Select maximum recordings"
 		/>
 	{/if}
@@ -103,10 +102,10 @@
 			id="always-on-top"
 			label="Always On Top"
 			items={ALWAYS_ON_TOP_OPTIONS}
-			selected={settings.value['system.alwaysOnTop']}
-			onSelectedChange={async (selected) => {
-				settings.updateKey('system.alwaysOnTop', selected);
-			}}
+			bind:selected={
+				() => settings.value['system.alwaysOnTop'],
+				(selected) => settings.updateKey('system.alwaysOnTop', selected)
+			}
 			placeholder="Select a language"
 		/>
 	{/if}

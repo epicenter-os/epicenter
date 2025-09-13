@@ -89,7 +89,7 @@ export function createOpenaiTranscriptionService() {
 						`recording.${getExtensionFromAudioBlob(audioBlob)}`,
 						{ type: audioBlob.type },
 					),
-				mapErr: (error) =>
+				catch: (error) =>
 					WhisperingErr({
 						title: '📁 File Creation Failed',
 						description:
@@ -117,7 +117,7 @@ export function createOpenaiTranscriptionService() {
 							? Number.parseFloat(options.temperature)
 							: undefined,
 					}),
-				mapErr: (error) => {
+				catch: (error) => {
 					// Check if it's NOT an OpenAI API error
 					if (!(error instanceof OpenAI.APIError)) {
 						// This is an unexpected error type

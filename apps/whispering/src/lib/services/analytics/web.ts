@@ -13,7 +13,7 @@ export function createAnalyticsServiceWeb(): AnalyticsService {
 					const { type, ...properties } = event;
 					await trackEvent(type, properties);
 				},
-				mapErr: (error) =>
+				catch: (error) =>
 					AnalyticsServiceErr({
 						message: 'Failed to log analytics event',
 						context: { event },

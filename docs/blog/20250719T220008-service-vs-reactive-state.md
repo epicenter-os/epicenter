@@ -22,7 +22,7 @@ export function createWorkspaceService() {
           const stored = localStorage.getItem(WORKSPACES_KEY);
           return stored ? JSON.parse(stored) : [];
         },
-        mapError: (error) => WorkspaceServiceError({
+        catch: (error) => WorkspaceServiceError({
           message: 'Failed to retrieve workspaces',
           cause: error
         })

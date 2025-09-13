@@ -1,10 +1,3 @@
-// Platform-specific modules
-#[cfg(target_os = "macos")]
-mod accessibility;
-
-// Re-export platform-specific functions
-#[cfg(target_os = "macos")]
-use accessibility::{is_macos_accessibility_enabled, open_apple_accessibility};
 
 use tauri::Manager;
 use tauri_plugin_aptabase::EventTracker;
@@ -15,14 +8,31 @@ use recorder::commands::{
     get_current_recording_id, init_recording_session, start_recording, stop_recording, AppData,
 };
 
+pub mod whisper_cpp;
+use whisper_cpp::transcribe_with_whisper_cpp;
+
+pub mod windows_path;
+use windows_path::fix_windows_path;
+
+pub mod graceful_shutdown;
+use graceful_shutdown::send_sigint;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 #[tokio::main]
 pub async fn run() {
-    let mut builder = tauri::Builder::default();
+    // Fix PATH environment for GUI applications on macOS and Linux
+    // This ensures commands like ffmpeg installed via Homebrew are accessible
+    let _ = fix_path_env::fix();
     
+    // Fix Windows PATH inheritance bug
+    // This ensures child processes can find ffmpeg on Windows
+    fix_windows_path();
+    
+    let mut builder = tauri::Builder::default();
+
     // Try to get APTABASE_KEY from environment, use empty string if not found
     let aptabase_key = option_env!("APTABASE_KEY").unwrap_or("");
-    
+
     // Only add Aptabase plugin if key is not empty
     if !aptabase_key.is_empty() {
         println!("Aptabase analytics enabled");
@@ -30,8 +40,9 @@ pub async fn run() {
     } else {
         println!("Warning: APTABASE_KEY not found, analytics disabled");
     }
-    
+
     builder = builder
+        .plugin(tauri_plugin_macos_permissions::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
@@ -40,6 +51,7 @@ pub async fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_opener::init())
         .manage(AppData::new());
@@ -54,13 +66,9 @@ pub async fn run() {
         }));
     }
 
-    // Platform-specific command handlers
-    #[cfg(target_os = "macos")]
+    // Register command handlers (same for all platforms now)
     let builder = builder.invoke_handler(tauri::generate_handler![
         write_text,
-        paste,
-        open_apple_accessibility,
-        is_macos_accessibility_enabled,
         // Audio recorder commands
         get_current_recording_id,
         enumerate_recording_devices,
@@ -69,26 +77,15 @@ pub async fn run() {
         start_recording,
         stop_recording,
         cancel_recording,
-    ]);
-
-    #[cfg(not(target_os = "macos"))]
-    let builder = builder.invoke_handler(tauri::generate_handler![
-        write_text,
-        paste,
-        // Audio recorder commands
-        get_current_recording_id,
-        enumerate_recording_devices,
-        init_recording_session,
-        close_recording_session,
-        start_recording,
-        stop_recording,
-        cancel_recording,
+        // Whisper transcription
+        transcribe_with_whisper_cpp,
+        send_sigint,
     ]);
 
     let app = builder
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
-    
+
     app.run(|handler, event| {
         // Only track events if Aptabase is enabled (key is not empty)
         if !aptabase_key.is_empty() {
@@ -107,46 +104,68 @@ pub async fn run() {
 }
 
 use enigo::{Direction, Enigo, Key, Keyboard, Settings};
+use tauri_plugin_clipboard_manager::ClipboardExt;
 
-/// Types text character-by-character at the cursor position using Enigo.
+/// Writes text at the cursor position using the clipboard sandwich technique
 ///
-/// This simulates keyboard input by typing each character sequentially, which works
-/// across all applications but is slower than pasting. Best used as a fallback when
-/// paste operations fail or for applications that don't support paste.
+/// This method preserves the user's existing clipboard content by:
+/// 1. Saving the current clipboard content
+/// 2. Writing the new text to clipboard
+/// 3. Simulating a paste operation (Cmd+V on macOS, Ctrl+V elsewhere)
+/// 4. Restoring the original clipboard content
 ///
-/// **Note**: This method may have issues with non-ASCII characters in some applications
-/// and can appear slow for large text blocks.
+/// This approach is faster than typing character-by-character and preserves
+/// the user's clipboard, making it ideal for inserting transcribed text.
 #[tauri::command]
-fn write_text(text: String) -> Result<(), String> {
-    let mut enigo = Enigo::new(&Settings::default()).map_err(|e| e.to_string())?;
-    enigo.text(&text).map_err(|e| e.to_string())
-}
+async fn write_text(app: tauri::AppHandle, text: String) -> Result<(), String> {
+    // 1. Save current clipboard content
+    let original_clipboard = app.clipboard().read_text().ok();
 
-/// Simulates a paste operation (Cmd+V on macOS, Ctrl+V elsewhere).
-///
-/// **Important**: This assumes text is already in the system clipboard. Call your
-/// clipboard service to copy text before using this function.
-///
-/// **Known Issue**: Uses `Key::Unicode('v')` which assumes QWERTY keyboard layout.
-/// This may fail on alternative layouts like Dvorak or Colemak.
-#[tauri::command]
-fn paste() -> Result<(), String> {
-    let mut enigo = Enigo::new(&Settings::default()).map_err(|e| e.to_string())?;
+    // 2. Write new text to clipboard
+    app.clipboard()
+        .write_text(&text)
+        .map_err(|e| format!("Failed to write to clipboard: {}", e))?;
 
+    // Small delay to ensure clipboard is updated
+    tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+
+    // 3. Simulate paste operation using virtual key codes (layout-independent)
+    let mut enigo = Enigo::new(&Settings::default()).map_err(|e| e.to_string())?;
+    
+    // Use virtual key codes for V to work with any keyboard layout
     #[cfg(target_os = "macos")]
-    let modifier = Key::Meta;
-    #[cfg(not(target_os = "macos"))]
-    let modifier = Key::Control;
+    let (modifier, v_key) = (Key::Meta, Key::Other(9)); // Virtual key code for V on macOS
+    #[cfg(target_os = "windows")]
+    let (modifier, v_key) = (Key::Control, Key::Other(0x56)); // VK_V on Windows
+    #[cfg(target_os = "linux")]
+    let (modifier, v_key) = (Key::Control, Key::Unicode('v')); // Fallback for Linux
 
+    // Press modifier + V
     enigo
         .key(modifier, Direction::Press)
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| format!("Failed to press modifier key: {}", e))?;
     enigo
-        .key(Key::Unicode('v'), Direction::Click)
-        .map_err(|e| e.to_string())?;
+        .key(v_key, Direction::Press)
+        .map_err(|e| format!("Failed to press V key: {}", e))?;
+    
+    // Release V + modifier (in reverse order for proper cleanup)
+    enigo
+        .key(v_key, Direction::Release)
+        .map_err(|e| format!("Failed to release V key: {}", e))?;
     enigo
         .key(modifier, Direction::Release)
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| format!("Failed to release modifier key: {}", e))?;
+
+    // Small delay to ensure paste completes
+    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+
+    // 4. Restore original clipboard content
+    if let Some(content) = original_clipboard {
+        app.clipboard()
+            .write_text(&content)
+            .map_err(|e| format!("Failed to restore clipboard: {}", e))?;
+    }
 
     Ok(())
 }
+

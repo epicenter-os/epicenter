@@ -12,7 +12,7 @@
 		"./versions": "./src/versions.ts"
 	},
 	"dependencies": {
-		"arktype": "^2.1.20"
+		"arktype": "catalog:"
 	},
 	"devDependencies": {
 		"@types/node": "^20.11.5",

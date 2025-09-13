@@ -7,7 +7,22 @@
   <p align="center">Own your data. Use any model you want. Free and open source ❤️</p>
 </p>
 
-> **📢 Repository Update:** The [Whispering](https://github.com/braden-w/whispering/) repository is now part of **Epicenter**! You can find it [here](https://github.com/epicenter-so/epicenter/tree/main/apps/whispering). Everything else remains the same—same tools, same philosophy, same team.
+> **🚧 Development Update:** Development on Epicenter will be a bit slower in the coming week while Braden takes some calls and stabilizes a new framework. Updates will resume after!
+
+> **📢 Repository Update:** Whispering has become **Epicenter**! The original repository moved [here](https://github.com/epicenter-so/epicenter/tree/main/apps/whispering). Everything else remains the same—same tools, same philosophy, same team.
+>
+> <details>
+> <summary> Full details...
+> </summary>
+>
+> - Whispering's evolution beyond transcription required changes to the repository's structure and branding.
+> - Everything else remains the same—same tools, same philosophy, same team.
+> - The original app lives on as [*Epicenter Whispering*](https://github.com/epicenter-so/epicenter/tree/main/apps/whispering), keeping a tight focus on transcription.
+> - This makes room for standalone apps with complementary, but non-transcription-related features (like [*Epicenter Assistant*](https://github.com/epicenter-so/epicenter/tree/main/apps/sh)).
+> - The new [root](https://github.com/epicenter-so/epicenter/) of the Epicenter repository contains common files supporting all the apps in the ecosystem.
+> - Note: the old URL [github.com/braden-w/whispering](https://github.com/braden-w/whispering) is now just a thin placeholder redirecting to this rebranded repository.  
+>
+> </details>
 
 <p align="center">
   <!-- GitHub Stars Badge -->
@@ -49,21 +64,31 @@
 
 Epicenter is an ecosystem of open-source, local-first apps. Our eventual goal is to store all of your data—notes, transcripts, chat histories—in a single folder of plain text and SQLite. Every tool we build shares this memory. It's open, tweakable, and yours. Grep it, open it in Obsidian, host it wherever you like. The choice is yours.
 
+### The Vision (how the ecosystem will work):
 
+- Long-time Epicenter Whispering users may have configured numerous LLM API keys, transformations, and even local models.
+- When the Epicenter Assistant is started for the very first time, all these API keys, transformations and local models seamlessly work.
+- Epicenter Assistant may even access Whispering transcription history to provide personalized results out of the box.
+- Of course, this works the other way, too: Whispering can take advantage of your Epicenter Assistant history to optimize transcriptions and transformations!
+- In a siloed ecosystem, this requires much more effort, or may not even be possible.
 
 ## Current Tools
 
 <table>
   <tr>
     <td align="center" width="50%">
-      <h3>🎙️ <a href="https://github.com/epicenter-so/epicenter/tree/main/apps/whispering">Whispering</a></h3>
+      <h3>🎙️ <a href="https://github.com/epicenter-so/epicenter/tree/main/apps/whispering">Epicenter Whispering</a></h3>
       <p>Press shortcut → speak → get text. Desktop transcription that cuts out the middleman. Bring your own API key.</p>
-      <p><strong>→ <a href="https://github.com/epicenter-so/epicenter/tree/main/apps/whispering">Explore Whispering</a></strong></p>
+      <p><strong>→ <a href="https://github.com/epicenter-so/epicenter/tree/main/apps/whispering">View source code</a></strong></p>
     </td>
     <td align="center" width="50%">
-      <h3>🤖 <a href="https://github.com/epicenter-so/epicenter/tree/main/apps/sh">epicenter.sh</a></h3>
+      <h3>
+        🤖 <a href="https://github.com/epicenter-so/epicenter/tree/main/apps/sh">Epicenter Assistant</a>
+        (currently unstable, waiting for 
+        <a href="https://github.com/sst/opencode/pull/1218">this PR</a> in OpenCode to merge)
+      </h3>
       <p>A local-first assistant you can chat with. It lives in your folder, becoming the access point to everything you've ever written, thought, or built.</p>
-      <p><strong>→ <a href="https://github.com/epicenter-so/epicenter/tree/main/apps/sh">Explore epicenter.sh</a></strong></p>
+      <p><strong>→ <a href="https://github.com/epicenter-so/epicenter/tree/main/apps/sh">View source code</a></strong></p>
     </td>
   </tr>
 </table>
@@ -73,15 +98,38 @@ Epicenter is an ecosystem of open-source, local-first apps. Our eventual goal is
 Our vision is to build a personal workspace where you own your data, choose your models, and replace siloed apps with open, interoperable alternatives. All while preserving authenticity and being free and open source.
 
 
+## Quick Start
+
+Epicenter will have more apps in the future, but for now, the best way to get started is to run Whispering locally:
+
+```bash
+# Prerequisites: 
+# - Install Bun from https://bun.sh (run bun upgrade if there's issues)
+# - Install Rust and Cargo from https://www.rust-lang.org/tools/install (brew install rustup)
+
+
+git clone https://github.com/epicenter-so/epicenter.git
+cd epicenter
+bun install  # Will prompt to upgrade if your Bun version is too old
+cd apps/whispering
+bun dev
+```
+
 ## Join Us
 
-<div align="center">
-  <h3>🚀 We're looking for contributors</h3>
-  <p>If you're passionate about open source, local-first software, or are just a cracked Svelte/TypeScript developer—we'd love to build with you.</p>
-  <p><strong>→ <a href="CONTRIBUTING.md">Read our Contributing Guide</a> to get started</strong></p>
-  <p>If you think like a generalist, build like a hacker, and value tools that respect your mind:</p>
-  <p><strong>→ <a href="https://go.epicenter.so/discord">Join our Discord and DM me</a></strong></p>
-</div>
+## Discord Community
+
+If you think like a generalist, build like a hacker, and value tools that respect your mind—you'll fit right in.
+
+**→ [Join our Discord](https://go.epicenter.so/discord)**
+
+### We're looking for contributors
+
+If you're passionate about open source, local-first software, or are just a cracked Svelte/TypeScript developer—we'd love to build with you.
+
+**→ [Read our Contributing Guide](CONTRIBUTING.md) to get started**
+
+Contributors coordinate and share ideas in our Discord community.
 
 ## Tech Stack
 
@@ -105,5 +153,5 @@ Our vision is to build a personal workspace where you own your data, choose your
 </p>
 
 <p align="center">
-  <sub>Built with ❤️ for data ownership, local-first, and open-souce</sub>
+  <sub>Built with ❤️ for data ownership, local-first, and open-source</sub>
 </p>

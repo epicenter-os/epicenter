@@ -9,6 +9,7 @@
  * - Tauri configuration
  * - Cargo.toml
  * - Cargo.lock (via cargo update)
+ * - packages/constants/src/versions.ts
  *
  * Usage: bun run bump-version <new-version>
  * Example: bun run bump-version 7.0.1
@@ -42,14 +43,14 @@ if (!/^\d+\.\d+\.\d+$/.test(newVersion)) {
 
 /**
  * Configuration for files that need version updates
- * @type {Array<{path: string, type: 'json' | 'toml'}>}
  */
 const files = [
 	{ path: 'package.json', type: 'json' },
 	{ path: 'apps/whispering/package.json', type: 'json' },
 	{ path: 'apps/whispering/src-tauri/tauri.conf.json', type: 'json' },
 	{ path: 'apps/whispering/src-tauri/Cargo.toml', type: 'toml' },
-];
+	{ path: 'packages/constants/src/versions.ts', type: 'ts' },
+] satisfies { path: string; type: 'json' | 'toml' | 'ts' }[];
 
 /** Track the current version before updating */
 let oldVersion: string | null = null;
@@ -79,6 +80,18 @@ for (const { path, type } of files) {
 		}
 		const updated = content.replace(versionRegex, `version = "${newVersion}"`);
 		await fs.writeFile(fullPath, updated);
+	} else if (type === 'ts') {
+		// Handle TypeScript files (versions.ts) with regex replacement
+		const versionRegex = /whispering:\s*'[\d.]+'/;
+		const match = content.match(versionRegex);
+		if (match && !oldVersion) {
+			oldVersion = match[0].match(/'([\d.]+)'/)?.[1] ?? null;
+		}
+		const updated = content.replace(
+			versionRegex,
+			`whispering: '${newVersion}'`,
+		);
+		await fs.writeFile(fullPath, updated);
 	}
 
 	console.log(`✅ Updated ${path}`);
@@ -89,7 +102,7 @@ for (const { path, type } of files) {
  */
 try {
 	console.log('\n🔄 Updating Cargo.lock...');
-	const { stdout, stderr } = await execAsync(
+	const { stderr } = await execAsync(
 		'cd apps/whispering/src-tauri && cargo update -p whispering',
 	);
 	if (stderr && !stderr.includes('Locking')) {

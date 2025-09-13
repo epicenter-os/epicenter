@@ -25,7 +25,7 @@ export function createGoogleCompletionService(): CompletionService {
 					const { response } = await model.generateContent(combinedPrompt);
 					return response.text();
 				},
-				mapErr: (error) =>
+				catch: (error) =>
 					CompletionServiceErr({
 						message: `Google API Error: ${extractErrorMessage(error)}`,
 						context: { model: modelName, systemPrompt, userPrompt },

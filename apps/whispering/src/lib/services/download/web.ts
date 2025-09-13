@@ -17,7 +17,7 @@ export function createDownloadServiceWeb(): DownloadService {
 					document.body.removeChild(a);
 					URL.revokeObjectURL(url);
 				},
-				mapErr: (error) =>
+				catch: (error) =>
 					DownloadServiceErr({
 						message:
 							'There was an error saving the recording in your browser. Please try again.',

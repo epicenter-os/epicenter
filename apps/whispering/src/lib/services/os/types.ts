@@ -5,5 +5,5 @@ export const { OsServiceError, OsServiceErr } =
 	createTaggedError('OsServiceError');
 
 export type OsService = {
-	type: () => OsType;
+	type: () => Exclude<OsType, 'android' | 'ios'>;
 };

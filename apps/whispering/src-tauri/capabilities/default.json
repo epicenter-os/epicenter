@@ -22,10 +22,12 @@
     "clipboard-manager:allow-write-text",
     "fs:allow-read",
     "fs:allow-write",
+    "fs:allow-app-write",
     "fs:allow-exists",
     "fs:allow-create",
     "fs:allow-mkdir",
     "fs:allow-remove",
+    "fs:allow-stat",
     "dialog:allow-open",
     {
       "identifier": "fs:scope",
@@ -42,7 +44,7 @@
         { "url": "https://*:*" }
       ]
     },
-     {
+    {
       "identifier": "opener:allow-open-path",
       "allow": [
         {
@@ -52,6 +54,63 @@
     },
     "opener:allow-default-urls",
     "updater:default",
-    "aptabase:allow-track-event"
+    "aptabase:allow-track-event",
+    "macos-permissions:default",
+    "shell:default",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "cmd",
+          "cmd": "cmd",
+          "args": [
+            "/c",
+            {
+              "validator": ".*"
+            }
+          ]
+        },
+        {
+          "name": "sh",
+          "cmd": "sh",
+          "args": [
+            "-c",
+            {
+              "validator": ".*"
+            }
+          ]
+        },
+        {
+          "name": "open",
+          "cmd": "open",
+          "args": true
+        }
+      ]
+    },
+    {
+      "identifier": "shell:allow-spawn",
+      "allow": [
+        {
+          "name": "cmd",
+          "cmd": "cmd",
+          "args": [
+            "/c",
+            {
+              "validator": ".*"
+            }
+          ]
+        },
+        {
+          "name": "sh",
+          "cmd": "sh",
+          "args": [
+            "-c",
+            {
+              "validator": ".*"
+            }
+          ]
+        }
+      ]
+    }
   ]
 }

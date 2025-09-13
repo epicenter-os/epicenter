@@ -18,7 +18,7 @@ export function createPlaySoundServiceDesktop(): PlaySoundService {
 					audioElement.volume = individualVolume ?? 0.5;
 					await audioElement.play();
 				},
-				mapErr: (error) =>
+				catch: (error) =>
 					PlaySoundServiceErr({
 						message: 'Failed to play sound',
 						context: { soundName },

@@ -18,12 +18,6 @@ export const GROQ_MODELS = [
 			'Fast multilingual model with good accuracy (12% WER). Best price-to-performance ratio for multilingual applications.',
 		cost: '$0.04/hour',
 	},
-	{
-		name: 'distil-whisper-large-v3-en',
-		description:
-			'Fastest and most cost-effective model, but English-only. Recommended for English transcription where speed and cost are priorities.',
-		cost: '$0.02/hour',
-	},
 ] as const;
 
 export type GroqModel = (typeof GROQ_MODELS)[number];
@@ -55,11 +49,11 @@ export function createGroqTranscriptionService() {
 				});
 			}
 
-			if (!options.apiKey.startsWith('gsk_')) {
+			if (!options.apiKey.startsWith('gsk_') && !options.apiKey.startsWith('xai-')) {
 				return WhisperingErr({
 					title: '🔑 Invalid API Key Format',
 					description:
-						'Your Groq API key should start with "gsk_". Please check and update your API key.',
+						'Your Groq API key should start with "gsk_" or "xai-". Please check and update your API key.',
 					action: {
 						type: 'link',
 						label: 'Update API key',
@@ -85,7 +79,7 @@ export function createGroqTranscriptionService() {
 						`recording.${getExtensionFromAudioBlob(audioBlob)}`,
 						{ type: audioBlob.type },
 					),
-				mapErr: (error) =>
+				catch: (error) =>
 					WhisperingErr({
 						title: '📄 File Creation Failed',
 						description:
@@ -114,7 +108,7 @@ export function createGroqTranscriptionService() {
 							? Number.parseFloat(options.temperature)
 							: undefined,
 					}),
-				mapErr: (error) => {
+				catch: (error) => {
 					// Check if it's NOT a Groq API error
 					if (!(error instanceof Groq.APIError)) {
 						// This is an unexpected error type

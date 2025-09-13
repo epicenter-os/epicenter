@@ -49,6 +49,26 @@
 	import RenderAudioUrl from './RenderAudioUrl.svelte';
 	import TranscribedTextDialog from './TranscribedTextDialog.svelte';
 	import { RecordingRowActions } from './row-actions';
+	import { format } from 'date-fns';
+
+	/**
+	 * Returns a cell renderer for a date/time column using date-fns format.
+	 * @param {string} formatString - date-fns format string
+	 * @returns {(args: { getValue: () => string }) => string}
+	 */
+	function formattedCell(formatString: string) {
+		return ({ getValue }: { getValue: () => string }) => {
+			const value = getValue();
+			if (!value) return '';
+			const date = new Date(value);
+			if (isNaN(date.getTime())) return value;
+			try {
+				return format(date, formatString);
+			} catch {
+				return value;
+			}
+		};
+	}
 
 	const getAllRecordingsQuery = createQuery(
 		rpc.recordings.getAllRecordings.options,
@@ -59,7 +79,9 @@
 	const deleteRecordings = createMutation(
 		rpc.recordings.deleteRecordings.options,
 	);
-	const copyToClipboard = createMutation(rpc.clipboard.copyToClipboard.options);
+	const copyToClipboard = createMutation(rpc.text.copyToClipboard.options);
+
+	const DATE_FORMAT = 'PP p'; // e.g., Aug 13, 2025, 10:00 AM
 
 	const columns: ColumnDef<Recording>[] = [
 		{
@@ -126,6 +148,7 @@
 					column,
 					headerText: 'Timestamp',
 				}),
+			cell: formattedCell(DATE_FORMAT),
 		},
 		{
 			id: 'Created At',
@@ -135,6 +158,7 @@
 					column,
 					headerText: 'Created At',
 				}),
+			cell: formattedCell(DATE_FORMAT),
 		},
 		{
 			id: 'Updated At',
@@ -144,6 +168,7 @@
 					column,
 					headerText: 'Updated At',
 				}),
+			cell: formattedCell(DATE_FORMAT),
 		},
 		{
 			id: 'Transcribed Text',
@@ -349,8 +374,7 @@
 				placeholder="Filter transcripts..."
 				type="text"
 				class="w-full md:max-w-sm"
-				value={globalFilter}
-				oninput={(e) => (globalFilter = e.currentTarget.value)}
+				bind:value={globalFilter}
 			/>
 			<div class="flex w-full items-center justify-between gap-2">
 				{#if selectedRecordingRows.length > 0}
@@ -554,8 +578,10 @@
 							.getAllColumns()
 							.filter((c) => c.getCanHide()) as column (column.id)}
 							<DropdownMenu.CheckboxItem
-								checked={column.getIsVisible()}
-								onCheckedChange={(value) => column.toggleVisibility(!!value)}
+								bind:checked={
+									() => column.getIsVisible(),
+									(value) => column.toggleVisibility(!!value)
+								}
 							>
 								{column.columnDef.id}
 							</DropdownMenu.CheckboxItem>

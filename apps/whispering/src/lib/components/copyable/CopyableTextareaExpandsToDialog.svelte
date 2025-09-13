@@ -54,7 +54,7 @@
 
 	let isDialogOpen = $state(false);
 
-	const copyToClipboard = createMutation(rpc.clipboard.copyToClipboard.options);
+	const copyToClipboard = createMutation(rpc.text.copyToClipboard.options);
 </script>
 
 <Dialog.Root bind:open={isDialogOpen}>

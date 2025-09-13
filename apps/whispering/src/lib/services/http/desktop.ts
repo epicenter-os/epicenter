@@ -14,7 +14,7 @@ export function createHttpServiceDesktop(): HttpService {
 						body,
 						headers: headers,
 					}),
-				mapErr: (error) =>
+				catch: (error) =>
 					ConnectionErr({
 						message: 'Failed to establish connection',
 						context: { url, body, headers },
@@ -37,7 +37,7 @@ export function createHttpServiceDesktop(): HttpService {
 					const json = await response.json();
 					return schema.parse(json);
 				},
-				mapErr: (error) =>
+				catch: (error) =>
 					ParseErr({
 						message: 'Failed to parse response',
 						context: { url, body, headers },

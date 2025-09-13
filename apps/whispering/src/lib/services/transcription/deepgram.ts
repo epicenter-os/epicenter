@@ -6,11 +6,17 @@ import { z } from 'zod';
 import { HttpServiceLive } from '$lib/services/http';
 
 export const DEEPGRAM_TRANSCRIPTION_MODELS = [
+     {
+        name: 'nova-3',
+        description:
+            "Deepgram's most advanced speech-to-text model with superior accuracy and speed. Best for high-quality transcription needs.",
+        cost: '$0.0043/minute',
+    },
     {
         name: 'nova-2',
         description:
-            "Deepgram's most advanced speech-to-text model with superior accuracy and speed. Best for high-quality transcription needs.",
-        cost: '$0.0059/minute',
+            "Deepgram's previous best speech-to-text model.",
+        cost: '$0.0043/minute',
     },
     {
         name: 'nova',

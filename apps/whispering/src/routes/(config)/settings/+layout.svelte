@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { confirmationDialog } from '$lib/components/ConfirmationDialog.svelte';
 	import { Button } from '@repo/ui/button';
+	import { Link } from '@repo/ui/link';
 	import { Separator } from '@repo/ui/separator';
 	import { rpc } from '$lib/query';
 	import { RotateCcw } from '@lucide/svelte';
@@ -36,7 +37,7 @@
 	})();
 </script>
 
-<main class="sm:container flex w-full flex-1 flex-col pb-4 pt-2 px-4 mx-auto">
+<main class="flex w-full flex-1 flex-col pb-4 pt-2 px-4 mx-auto max-w-6xl">
 	<div
 		class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
 	>
@@ -49,16 +50,13 @@
 					{#if v.isOutdated}
 						{@const { latestVersion, currentVersion, latestReleaseUrl } = v}
 						Customize your experience for Whispering {currentVersion} (latest
-						<Button
-							class="px-0"
-							variant="link"
-							size="inline"
+						<Link
 							href={latestReleaseUrl}
 							target="_blank"
 							rel="noopener noreferrer"
 						>
 							{latestVersion}
-						</Button>).
+						</Link>).
 					{:else}
 						{@const { version } = v}
 						Customize your experience for Whispering {version}.

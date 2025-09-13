@@ -5,7 +5,7 @@
 	"type": "module",
 	"exports": {
 		"./eslint": "./eslint.ts",
-		"./prettier": "./prettier.ts"
+		"./prettier": "./prettier.js"
 	},
 	"peerDependencies": {
 		"eslint": ">=9.0.0",

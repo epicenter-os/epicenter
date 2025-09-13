@@ -1,4 +1,4 @@
-import type { CancelRecordingResult } from '$lib/constants/audio';
+import type { CancelRecordingResult, WhisperingRecordingState } from '$lib/constants/audio';
 import { createTaggedError } from 'wellcrafted/error';
 import type { Result } from 'wellcrafted/result';
 import type {
@@ -17,7 +17,7 @@ export const { RecorderServiceError, RecorderServiceErr } = createTaggedError(
 export type RecorderServiceError = ReturnType<typeof RecorderServiceError>;
 
 /**
- * Base parameters shared across all platforms
+ * Base parameters shared across all methods
  */
 type BaseRecordingParams = {
 	selectedDeviceId: DeviceIdentifier | null;
@@ -25,43 +25,55 @@ type BaseRecordingParams = {
 };
 
 /**
- * Desktop-specific recording parameters
+ * CPAL (native Rust) recording parameters
  */
-export type DesktopRecordingParams = BaseRecordingParams & {
-	platform: 'desktop';
-	outputFolder: string | null;
+export type CpalRecordingParams = BaseRecordingParams & {
+	method: 'cpal';
+	outputFolder: string;
 	sampleRate: string;
 };
 
 /**
- * Web-specific recording parameters
+ * Navigator (MediaRecorder) recording parameters
  */
-export type WebRecordingParams = BaseRecordingParams & {
-	platform: 'web';
+export type NavigatorRecordingParams = BaseRecordingParams & {
+	method: 'navigator';
 	bitrateKbps: string;
 };
 
 /**
- * Discriminated union for recording parameters based on platform
+ * FFmpeg recording parameters
  */
-export type StartRecordingParams = DesktopRecordingParams | WebRecordingParams;
+export type FfmpegRecordingParams = BaseRecordingParams & {
+	method: 'ffmpeg';
+	globalOptions: string;
+	inputOptions: string;
+	outputOptions: string;
+	outputFolder: string;
+};
 
 /**
- * Unified recorder service interface that both desktop and web implementations must satisfy
+ * Discriminated union for recording parameters based on method
+ */
+export type StartRecordingParams =
+	| CpalRecordingParams
+	| NavigatorRecordingParams
+	| FfmpegRecordingParams;
+
+/**
+ * Recorder service interface shared by all methods
  */
 export type RecorderService = {
 	/**
-	 * Get the current recording ID if a recording is in progress
-	 * Returns null if no recording is active
+	 * Get the current recorder state
+	 * Returns 'IDLE' if no recording is active, 'RECORDING' if recording is in progress
 	 */
-	getCurrentRecordingId(): Promise<Result<string | null, RecorderServiceError>>;
+	getRecorderState(): Promise<Result<WhisperingRecordingState, RecorderServiceError>>;
 
 	/**
 	 * Enumerate available recording devices with their labels and identifiers
 	 */
-	enumerateDevices(): Promise<
-		Result<Device[], RecorderServiceError>
-	>;
+	enumerateDevices(): Promise<Result<Device[], RecorderServiceError>>;
 
 	/**
 	 * Start a new recording session

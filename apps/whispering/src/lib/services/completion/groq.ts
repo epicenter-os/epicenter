@@ -17,7 +17,7 @@ export function createGroqCompletionService(): CompletionService {
 							{ role: 'user', content: userPrompt },
 						],
 					}),
-				mapErr: (error) => {
+				catch: (error) => {
 					// Check if it's NOT a Groq API error
 					if (!(error instanceof Groq.APIError)) {
 						// This is an unexpected error type

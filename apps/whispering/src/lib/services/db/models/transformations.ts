@@ -34,10 +34,13 @@ export type Transformation = {
 		type: (typeof TRANSFORMATION_STEP_TYPES)[number];
 
 		'prompt_transform.inference.provider': (typeof INFERENCE_PROVIDERS)[number];
-		'prompt_transform.inference.provider.OpenAI.model': (typeof OPENAI_INFERENCE_MODELS)[number];
-		'prompt_transform.inference.provider.Groq.model': (typeof GROQ_INFERENCE_MODELS)[number];
-		'prompt_transform.inference.provider.Anthropic.model': (typeof ANTHROPIC_INFERENCE_MODELS)[number];
-		'prompt_transform.inference.provider.Google.model': (typeof GOOGLE_INFERENCE_MODELS)[number];
+
+			   'prompt_transform.inference.provider.OpenAI.model': (typeof OPENAI_INFERENCE_MODELS)[number];
+			   'prompt_transform.inference.provider.Groq.model': (typeof GROQ_INFERENCE_MODELS)[number];
+			   'prompt_transform.inference.provider.Anthropic.model': (typeof ANTHROPIC_INFERENCE_MODELS)[number];
+			   'prompt_transform.inference.provider.Google.model': (typeof GOOGLE_INFERENCE_MODELS)[number];
+			   // OpenRouter model is a free string (user can enter any model)
+			   'prompt_transform.inference.provider.OpenRouter.model': string;
 
 		'prompt_transform.systemPromptTemplate': string;
 		'prompt_transform.userPromptTemplate': string;
@@ -67,20 +70,21 @@ export function generateDefaultTransformation(): Transformation {
 }
 
 export function generateDefaultTransformationStep(): TransformationStep {
-	return {
-		id: nanoid(),
-		type: 'prompt_transform',
-		'prompt_transform.inference.provider': 'Google',
-		'prompt_transform.inference.provider.OpenAI.model': 'gpt-4o',
-		'prompt_transform.inference.provider.Groq.model': 'llama-3.3-70b-versatile',
-		'prompt_transform.inference.provider.Anthropic.model': 'claude-sonnet-4-0',
-		'prompt_transform.inference.provider.Google.model': 'gemini-2.5-flash',
+       return {
+	       id: nanoid(),
+	       type: 'prompt_transform',
+	       'prompt_transform.inference.provider': 'Google',
+	       'prompt_transform.inference.provider.OpenAI.model': 'gpt-4o',
+	       'prompt_transform.inference.provider.Groq.model': 'llama-3.3-70b-versatile',
+	       'prompt_transform.inference.provider.Anthropic.model': 'claude-sonnet-4-0',
+	       'prompt_transform.inference.provider.Google.model': 'gemini-2.5-flash',
+	       'prompt_transform.inference.provider.OpenRouter.model': 'mistralai/mixtral-8x7b',
 
-		'prompt_transform.systemPromptTemplate': '',
-		'prompt_transform.userPromptTemplate': '',
+	       'prompt_transform.systemPromptTemplate': '',
+	       'prompt_transform.userPromptTemplate': '',
 
-		'find_replace.findText': '',
-		'find_replace.replaceText': '',
-		'find_replace.useRegex': false,
-	};
+	       'find_replace.findText': '',
+	       'find_replace.replaceText': '',
+	       'find_replace.useRegex': false,
+       };
 }

@@ -20,7 +20,10 @@
 		"shortDescription": "Press shortcut → speak → get text. Free and open source ❤️",
 		"createUpdaterArtifacts": true,
 		"macOS": {
-			"entitlements": "entitlements.plist"
+			"entitlements": "entitlements.plist",
+			"hardenedRuntime": true,
+			"minimumSystemVersion": "10.15",
+			"signingIdentity": "Developer ID Application: Braden Wong (3C7J97QA5Z)"
 		},
 		"linux": {
 			"appimage": {
@@ -34,7 +37,7 @@
 		}
 	},
 	"productName": "Whispering",
-	"version": "7.2.1",
+	"version": "7.4.0",
 	"identifier": "com.bradenwong.whispering",
 	"plugins": {
 		"updater": {
@@ -45,12 +48,13 @@
 		}
 	},
 	"app": {
+		"macOSPrivateApi": true,
 		"windows": [
 			{
 				"resizable": true,
 				"title": "Whispering",
-				"width": 800,
-				"height": 600,
+				"width": 1080,
+				"height": 800,
 				"minHeight": 84,
 				"minWidth": 72
 			}

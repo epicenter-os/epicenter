@@ -1,6 +1,6 @@
 {
 	"name": "@repo/whispering",
-	"version": "7.2.1",
+	"version": "7.4.0",
 	"description": "",
 	"exports": {
 		"./commands": "./src/lib/commands.ts"
@@ -8,7 +8,7 @@
 	"scripts": {
 		"dev:web": "vite dev",
 		"dev": "bun tauri dev",
-		"build": "vite build",
+		"build": "NODE_ENV=production vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -20,6 +20,7 @@
 	},
 	"license": "MIT",
 	"devDependencies": {
+		"@lucide/svelte": "catalog:",
 		"@repo/config": "workspace:*",
 		"@repo/ui": "workspace:*",
 		"@sveltejs/adapter-static": "^3.0.8",
@@ -28,7 +29,6 @@
 		"@tailwindcss/vite": "^4.1.11",
 		"@tauri-apps/cli": "^2.7.1",
 		"eslint": "catalog:",
-		"@lucide/svelte": "catalog:",
 		"mode-watcher": "catalog:",
 		"prettier": "catalog:",
 		"svelte": "catalog:",
@@ -36,7 +36,8 @@
 		"svelte-sonner": "catalog:",
 		"tailwindcss": "catalog:",
 		"typescript": "catalog:",
-		"vite": "catalog:"
+		"vite": "catalog:",
+		"wrangler": "^4.29.1"
 	},
 	"type": "module",
 	"dependencies": {
@@ -62,6 +63,7 @@
 		"@tauri-apps/plugin-opener": "^2.4.0",
 		"@tauri-apps/plugin-os": "^2.3.0",
 		"@tauri-apps/plugin-process": "^2.3.0",
+		"@tauri-apps/plugin-shell": "^2.3.0",
 		"@tauri-apps/plugin-updater": "^2.9.0",
 		"arktype": "catalog:",
 		"audio-recorder-polyfill": "^0.4.1",
@@ -71,6 +73,7 @@
 		"groq-sdk": "^0.25.0",
 		"nanoid": "catalog:",
 		"openai": "^5.7.0",
+		"tauri-plugin-macos-permissions-api": "^2.3.0",
 		"wellcrafted": "catalog:",
 		"zod": "catalog:"
 	}

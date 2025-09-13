@@ -11,11 +11,13 @@ let editingWorkspace = $state(null);
 
 Then wire up the buttons to set these values, render a single dialog at the bottom, check which workspace we're operating on... The usual dance.
 
-But something felt off. I had two state variables just to track which modals were open. The parent component was getting cluttered with modal management logic that had nothing to do with displaying workspaces.
+But something felt off: I had two state variables just to track which modals were open. The parent component was getting cluttered with modal management logic that had nothing to do with displaying workspaces.
 
 ## The Realization
 
-Here's what hit me: Why am I managing modal state at the parent level when each row could just... have its own delete button with its own dialog?
+Here's what hit me:
+
+ ___Why am I managing modal state at the parent level when each row could just... have its own delete button with its own dialog?___
 
 So I created `DeleteWorkspaceButton.svelte`:
 
@@ -61,21 +63,21 @@ The parent component became dead simple:
 
 ## Why This Feels Wrong (But Isn't)
 
-Your brain might be screaming: "But you're creating 50 dialog instances for 50 rows! That's inefficient!"
+Your brain might be screaming: _"But you're creating 50 dialog instances for 50 rows! That's inefficient!"_
 
 Except it's not. Modern frameworks are really good at this. Svelte doesn't actually render 50 dialogs to the DOM. The dialog only exists when it's open. What you're "duplicating" is just component instances in memory, which is negligible.
 
 What you gain:
-- Zero state management in the parent
-- No callbacks to pass around
-- Each button is completely self-contained
-- Adding a new action (edit, duplicate, archive) doesn't touch the parent
+- Zero state management in the parent.
+- No callbacks to pass around.
+- Each button is completely self-contained.
+- Adding a new action (edit, duplicate, archive) doesn't touch the parent.
 
 ## The Pattern
 
 I've started applying this everywhere:
 
-**Before**: Parent manages state for child interactions
+**Before**: Parent manages state for child interactions.
 ```svelte
 <!-- Parent tracks which item is being edited -->
 let editingItem = null;
@@ -85,7 +87,7 @@ function handleEdit(item) { /* ... */ }
 function handleDelete(item) { /* ... */ }
 ```
 
-**After**: Children manage their own interactions
+**After**: Children manage their own interactions.
 ```svelte
 <!-- Each child handles its own state -->
 <EditButton {item} />
@@ -112,7 +114,7 @@ This is just taking that principle one step further: colocate modal interactions
 
 Here's the actual PR where I made this change: I removed 30 lines of state management code from the parent and replaced it with a 40-line self-contained component. The parent component is now just focused on what it should be: displaying workspaces.
 
-The lesson? Sometimes the "inefficient" approach is actually the clean approach. And clean code is usually more efficient in the ways that matter: developer time, bug surface area, and cognitive load.
+The lesson: Sometimes the "inefficient" approach is actually the clean approach. And clean code is usually more efficient in the ways that matter: developer time, bug surface area, and cognitive load.
 
 Next time you find yourself managing modal state in a parent component, ask yourself: could this just be a self-contained component instead?
 

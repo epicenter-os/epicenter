@@ -14,7 +14,7 @@ export function createAnalyticsServiceDesktop(): AnalyticsService {
 						props: properties,
 					});
 				},
-				mapErr: (error) =>
+				catch: (error) =>
 					AnalyticsServiceErr({
 						message: 'Failed to log analytics event via Tauri',
 						context: { event },

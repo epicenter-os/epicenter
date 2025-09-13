@@ -14,7 +14,7 @@ export function createTunnelServiceCloudflare(): TunnelService {
 				try: async () => {
 					await $`cloudflared --version`.quiet();
 				},
-				mapErr: (error) => {
+				catch: (error) => {
 					return TunnelServiceErr({
 						message: `cloudflared is not installed.\n\n${getInstallInstructions()}`,
 						cause: error,
@@ -93,7 +93,7 @@ export function createTunnelServiceCloudflare(): TunnelService {
 
 					return tunnelUrl;
 				},
-				mapErr: (error) =>
+				catch: (error) =>
 					TunnelServiceErr({
 						message: `Failed to start cloudflared tunnel on port ${port}: ${extractErrorMessage(error)}`,
 						cause: error,
@@ -109,7 +109,7 @@ export function createTunnelServiceCloudflare(): TunnelService {
 						currentProcess = null;
 					}
 				},
-				mapErr: (error) =>
+				catch: (error) =>
 					TunnelServiceErr({
 						message: `Failed to stop tunnel: ${extractErrorMessage(error)}`,
 						cause: error,

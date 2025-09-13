@@ -17,7 +17,7 @@ export function createBrowserService(): BrowserService {
 						await $`${openCommand} ${url}`;
 					}
 				},
-				mapErr: (error) =>
+				catch: (error) =>
 					BrowserServiceErr({
 						message: `Failed to open URL: ${url}`,
 						cause: error,

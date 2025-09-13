@@ -46,7 +46,8 @@ function createDeepgramTranscriptionService(deps: DeepgramTranscriptionServiceDe
 #### 3. Service Configuration (`/lib/constants/transcription/service-config.ts`)
 ```typescript
 export const DEEPGRAM_TRANSCRIPTION_MODELS = [
-    { value: 'nova-2', label: 'Nova-2 (Latest)' },
+    { value: 'nova-3', label: 'Nova-3 (Latest)' },
+    { value: 'nova-2', label: 'Nova-2' },
     { value: 'nova', label: 'Nova (Balanced)' },
     { value: 'enhanced', label: 'Enhanced (Accuracy)' },
     { value: 'base', label: 'Base (Fast)' }
@@ -73,7 +74,7 @@ Content-Type: {audio_mime_type}
 ```
 
 ### Query Parameters
-- `model`: Transcription model (nova-2, nova, enhanced, base)
+- `model`: Transcription model (nova-3, nova-2, nova, enhanced, base)
 - `smart_format`: Enable smart formatting (true)
 - `language`: Target language (optional, auto-detected if not specified)
 - `keywords`: Prompt/keywords for context (optional)
@@ -141,7 +142,7 @@ interface WhisperingError {
 
 ### Constants
 - **MAX_FILE_SIZE_MB**: 500MB (Deepgram limit)
-- **Default Model**: 'nova-2'
+- **Default Model**: 'nova-3'
 - **Default Smart Format**: true
 
 ## Security Considerations

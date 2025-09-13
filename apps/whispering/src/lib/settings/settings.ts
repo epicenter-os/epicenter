@@ -43,7 +43,13 @@ import type { ElevenLabsModel } from '$lib/services/transcription/elevenlabs';
 import type { GroqModel } from '$lib/services/transcription/groq';
 import type { OpenAIModel } from '$lib/services/transcription/openai';
 import { ALWAYS_ON_TOP_VALUES } from '$lib/constants/ui';
-import { type DeviceIdentifier, asDeviceIdentifier } from '$lib/services/types';
+import { asDeviceIdentifier } from '$lib/services/types';
+import {
+	FFMPEG_DEFAULT_GLOBAL_OPTIONS,
+	FFMPEG_DEFAULT_INPUT_OPTIONS,
+	FFMPEG_DEFAULT_OUTPUT_OPTIONS,
+	FFMPEG_DEFAULT_COMPRESSION_OPTIONS,
+} from '$lib/services/recorder/ffmpeg';
 import { type ZodBoolean, type ZodString, z } from 'zod';
 import type { DeepgramModel } from '$lib/services/transcription/deepgram';
 
@@ -88,7 +94,6 @@ export const settingsSchema = z.object({
 		z.ZodDefault<ZodBoolean>
 	>),
 
-
 	// Individual volume controls for each sound (0.0 to 1.0)
 	...({
 		'sound.volume.manual-start': z.number().min(0).max(1).default(0.5),
@@ -128,10 +133,10 @@ export const settingsSchema = z.object({
 		z.ZodDefault<z.ZodBoolean>
 	>),
 
-	'transcription.clipboard.copyOnSuccess': z.boolean().default(true),
-	'transcription.clipboard.pasteOnSuccess': z.boolean().default(false),
-	'transformation.clipboard.copyOnSuccess': z.boolean().default(true),
-	'transformation.clipboard.pasteOnSuccess': z.boolean().default(false),
+	'transcription.copyToClipboardOnSuccess': z.boolean().default(true),
+	'transcription.writeToCursorOnSuccess': z.boolean().default(true),
+	'transformation.copyToClipboardOnSuccess': z.boolean().default(true),
+	'transformation.writeToCursorOnSuccess': z.boolean().default(false),
 
 	'system.alwaysOnTop': z.enum(ALWAYS_ON_TOP_VALUES).default('Never'),
 
@@ -146,53 +151,69 @@ export const settingsSchema = z.object({
 	// Recording mode settings
 	'recording.mode': z.enum(RECORDING_MODES).default('manual'),
 	/**
-	 * Recording backend to use in desktop app.
-	 * - 'native': Uses Rust audio recording backend (CPAL)
-	 * - 'browser': Uses browser MediaRecorder API even in desktop
+	 * Recording method to use for manual recording in desktop app.
+	 * - 'cpal': Uses Rust audio recording method (CPAL)
+	 * - 'navigator': Uses MediaRecorder API (web standard)
+	 * - 'ffmpeg': Uses FFmpeg command-line tool for recording
 	 */
-	'recording.backend': z.enum(['native', 'browser']).default('browser'),
+	'recording.method': z.enum(['cpal', 'navigator', 'ffmpeg']).default('cpal'),
+
 	/**
-	 * Device identifier for manual recording.
-	 * Can be either a desktop device identifier or navigator device ID.
-	 * @see DeviceIdentifier
+	 * Device identifiers for each recording method.
+	 * Each method remembers its own selected device.
+	 * Note: VAD always uses navigator, so it shares the same device ID.
 	 */
-	'recording.manual.selectedDeviceId': z
+	'recording.cpal.deviceId': z
+		.string()
+		.nullable()
+		.transform((val) => (val ? asDeviceIdentifier(val) : null))
+		.default(null),
+	'recording.navigator.deviceId': z
+		.string()
+		.nullable()
+		.transform((val) => (val ? asDeviceIdentifier(val) : null))
+		.default(null),
+	'recording.ffmpeg.deviceId': z
 		.string()
 		.nullable()
 		.transform((val) => (val ? asDeviceIdentifier(val) : null))
 		.default(null),
 
-	/**
-	 * Device identifier for VAD recording.
-	 * Always a navigator device ID due to the nature of VAD recording
-	 * (it uses a MediaStream to track voice activity)
-	 * @see DeviceIdentifier
-	 */
-	'recording.vad.selectedDeviceId': z
-		.string()
-		.nullable()
-		.transform((val) => (val ? asDeviceIdentifier(val) : null))
-		.default(null),
-
-	// Browser recording settings (used when browser backend is selected)
+	// Browser recording settings (used when browser method is selected)
 	'recording.navigator.bitrateKbps': z
 		.enum(BITRATE_VALUES_KBPS)
 		.optional()
 		.default(DEFAULT_BITRATE_KBPS),
 
-	// Desktop recording settings
-	'recording.desktop.outputFolder': z.string().nullable().default(null), // null = use app data dir
-	'recording.desktop.sampleRate': z
+	// CPAL (Rust audio library) recording settings
+	'recording.cpal.outputFolder': z.string().nullable().default(null), // null = use app data dir
+	'recording.cpal.sampleRate': z
 		.enum(['16000', '44100', '48000'])
 		.default('16000'),
 
+	// FFmpeg recording settings - split into three customizable parts
+	'recording.ffmpeg.globalOptions': z
+		.string()
+		.default(FFMPEG_DEFAULT_GLOBAL_OPTIONS), // Global FFmpeg options (e.g., "-hide_banner -loglevel warning")
+	'recording.ffmpeg.inputOptions': z
+		.string()
+		.default(FFMPEG_DEFAULT_INPUT_OPTIONS), // Input options (e.g., "-f avfoundation" - platform defaults applied if empty)
+	'recording.ffmpeg.outputOptions': z
+		.string()
+		.default(FFMPEG_DEFAULT_OUTPUT_OPTIONS), // OGG Vorbis optimized for Whisper: 16kHz mono, 64kbps
+
 	'transcription.selectedTranscriptionService': z
 		.enum(TRANSCRIPTION_SERVICE_IDS)
-		.default('Groq'),
+		.default('whispercpp'),
 	// Shared settings in transcription
 	'transcription.outputLanguage': z.enum(SUPPORTED_LANGUAGES).default('auto'),
 	'transcription.prompt': z.string().default(''),
 	'transcription.temperature': z.string().default('0.0'),
+	// Audio compression settings
+	'transcription.compressionEnabled': z.boolean().default(false),
+	'transcription.compressionOptions': z
+		.string()
+		.default(FFMPEG_DEFAULT_COMPRESSION_OPTIONS),
 
 	// Service-specific settings
 	'transcription.openai.model': z
@@ -210,16 +231,22 @@ export const settingsSchema = z.object({
 	'transcription.deepgram.model': z
 		.string()
 		.transform((val) => val as (string & {}) | DeepgramModel['name'])
-		.default('nova-2' satisfies DeepgramModel['name']),
+		.default('nova-3' satisfies DeepgramModel['name']),
 	'transcription.speaches.baseUrl': z.string().default('http://localhost:8000'),
 	'transcription.speaches.modelId': z
 		.string()
 		.default('Systran/faster-distil-whisper-small.en'),
+	'transcription.whispercpp.modelPath': z.string().default(''),
 
 	'transformations.selectedTransformationId': z
 		.string()
 		.nullable()
 		.default(null),
+
+	'completion.openrouter.model': z
+		.string()
+		.default('mistralai/mixtral-8x7b')
+		.describe('OpenRouter model name'),
 
 	'apiKeys.openai': z.string().default(''),
 	'apiKeys.anthropic': z.string().default(''),
@@ -227,6 +254,7 @@ export const settingsSchema = z.object({
 	'apiKeys.google': z.string().default(''),
 	'apiKeys.deepgram': z.string().default(''),
 	'apiKeys.elevenlabs': z.string().default(''),
+	'apiKeys.openrouter': z.string().default(''),
 
 	// Analytics settings
 	'analytics.enabled': z.boolean().default(true),
@@ -356,6 +384,35 @@ export function getDefaultSettings(): Settings {
  * // All return getDefaultSettings()
  */
 export function parseStoredSettings(storedValue: unknown): Settings {
+	// Migrate old settings keys to new ones
+	if (typeof storedValue === 'object' && storedValue !== null) {
+		const migrated = { ...storedValue } as Record<string, unknown>;
+
+		// Migrate clipboard settings to new names
+		if ('transcription.clipboard.copyOnSuccess' in migrated) {
+			migrated['transcription.copyToClipboardOnSuccess'] =
+				migrated['transcription.clipboard.copyOnSuccess'];
+			delete migrated['transcription.clipboard.copyOnSuccess'];
+		}
+		if ('transcription.clipboard.pasteOnSuccess' in migrated) {
+			migrated['transcription.writeToCursorOnSuccess'] =
+				migrated['transcription.clipboard.pasteOnSuccess'];
+			delete migrated['transcription.clipboard.pasteOnSuccess'];
+		}
+		if ('transformation.clipboard.copyOnSuccess' in migrated) {
+			migrated['transformation.copyToClipboardOnSuccess'] =
+				migrated['transformation.clipboard.copyOnSuccess'];
+			delete migrated['transformation.clipboard.copyOnSuccess'];
+		}
+		if ('transformation.clipboard.pasteOnSuccess' in migrated) {
+			migrated['transformation.writeToCursorOnSuccess'] =
+				migrated['transformation.clipboard.pasteOnSuccess'];
+			delete migrated['transformation.clipboard.pasteOnSuccess'];
+		}
+
+		storedValue = migrated;
+	}
+
 	// First, try to parse the entire value
 	const fullResult = settingsSchema.safeParse(storedValue);
 	if (fullResult.success) {

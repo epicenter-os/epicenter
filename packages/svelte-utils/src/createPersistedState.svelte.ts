@@ -188,7 +188,7 @@ const { ParseJsonErr } = createTaggedError('ParseJsonError');
 function parseJson(value: string) {
 	return trySync({
 		try: () => JSON.parse(value) as unknown,
-		mapErr: (error) =>
+		catch: (error) =>
 			ParseJsonErr({
 				message: 'Failed to parse JSON',
 				context: { value },

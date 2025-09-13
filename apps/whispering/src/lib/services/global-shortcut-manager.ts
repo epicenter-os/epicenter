@@ -77,7 +77,7 @@ export function createGlobalShortcutManager() {
 							return;
 						}
 					}),
-				mapErr: (error) =>
+				catch: (error) =>
 					GlobalShortcutServiceErr({
 						message: `Failed to register global shortcut '${accelerator}': ${extractErrorMessage(error)}`,
 						context: { accelerator, error },
@@ -110,7 +110,7 @@ export function createGlobalShortcutManager() {
 
 			const { error: unregisterError } = await tryAsync({
 				try: () => tauriUnregister(accelerator),
-				mapErr: (error) =>
+				catch: (error) =>
 					GlobalShortcutServiceErr({
 						message: `Failed to unregister global shortcut '${accelerator}': ${extractErrorMessage(error)}`,
 						context: {
@@ -132,7 +132,7 @@ export function createGlobalShortcutManager() {
 		async unregisterAll(): Promise<Result<void, GlobalShortcutServiceError>> {
 			const { error: unregisterAllError } = await tryAsync({
 				try: () => tauriUnregisterAll(),
-				mapErr: (error) =>
+				catch: (error) =>
 					GlobalShortcutServiceErr({
 						message: `Failed to unregister all global shortcuts: ${extractErrorMessage(error)}`,
 						context: { error },

@@ -7,6 +7,7 @@ export const INFERENCE_PROVIDERS = [
 	'Groq',
 	'Anthropic',
 	'Google',
+	'OpenRouter',
 ] as const;
 
 export const INFERENCE_PROVIDER_OPTIONS = INFERENCE_PROVIDERS.map(

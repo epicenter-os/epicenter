@@ -11,7 +11,7 @@
 	// import { extension } from '@repo/extension';
 	import { createQuery } from '@tanstack/svelte-query';
 	import { ModeWatcher, mode } from 'mode-watcher';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { Toaster, type ToasterProps } from 'svelte-sonner';
 	import { syncWindowAlwaysOnTopWithRecorderState } from './alwaysOnTop.svelte';
 	import { checkForUpdates } from './check-for-updates';
@@ -22,6 +22,11 @@
 		syncLocalShortcutsWithSettings,
 	} from './register-commands';
 	import { registerOnboarding } from './register-onboarding';
+	import { checkFfmpeg } from './check-ffmpeg';
+	import {
+		registerAccessibilityPermission,
+		registerMicrophonePermission,
+	} from './register-permissions';
 	import { syncIconWithRecorderState } from './syncIconWithRecorderState.svelte';
 
 	const getRecorderStateQuery = createQuery(
@@ -29,11 +34,15 @@
 	);
 	const getVadStateQuery = createQuery(rpc.vadRecorder.getVadState.options);
 
+	let cleanupAccessibilityPermission: (() => void) | undefined;
+	let cleanupMicrophonePermission: (() => void) | undefined;
+
 	onMount(async () => {
 		window.commands = commandCallbacks;
 		window.goto = goto;
 		syncLocalShortcutsWithSettings();
 		resetLocalShortcutsToDefaultIfDuplicates();
+		await checkFfmpeg();
 		if (window.__TAURI_INTERNALS__) {
 			syncGlobalShortcutsWithSettings();
 			resetGlobalShortcutsToDefaultIfDuplicates();
@@ -43,6 +52,15 @@
 			// await extension.notifyWhisperingTabReady(undefined);
 		}
 		registerOnboarding();
+
+		// Register permission checkers separately
+		cleanupAccessibilityPermission = registerAccessibilityPermission();
+		cleanupMicrophonePermission = registerMicrophonePermission();
+	});
+
+	onDestroy(() => {
+		cleanupAccessibilityPermission?.();
+		cleanupMicrophonePermission?.();
 	});
 
 	if (window.__TAURI_INTERNALS__) {
@@ -73,6 +91,7 @@
 				closeButton: 'w-full mt-3 inline-flex justify-center',
 			},
 		},
+		closeButton: true,
 	} satisfies ToasterProps;
 
 	let { children } = $props();
@@ -94,7 +113,7 @@
 	</span>
 </button>
 
-<div class="xxs:flex hidden flex-col items-center gap-2">
+<div class="hidden flex-col items-center gap-2 xxs:flex min-w-0">
 	{@render children()}
 </div>
 
@@ -111,9 +130,9 @@
 <UpdateDialog />
 
 <style>
-   :global(body) {
-      min-height: 100vh;
-      display: grid;
-      grid-template-rows: 1fr auto;
-   }
+	:global(body) {
+		min-height: 100vh;
+		display: grid;
+		grid-template-rows: 1fr auto;
+	}
 </style>

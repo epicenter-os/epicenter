@@ -89,7 +89,7 @@ export function createVadService() {
 						},
 						model: 'v5',
 					}),
-				mapErr: (error) =>
+				catch: (error) =>
 					VadRecorderServiceErr({
 						message:
 							'Failed to start voice activated capture. Your voice activated capture could not be started.',
@@ -108,7 +108,7 @@ export function createVadService() {
 			// Start listening
 			const { error: startError } = trySync({
 				try: () => newVad.start(),
-				mapErr: (error) =>
+				catch: (error) =>
 					VadRecorderServiceErr({
 						message: `Failed to start Voice Activity Detector. ${extractErrorMessage(error)}`,
 						context: { vadState },
@@ -119,7 +119,7 @@ export function createVadService() {
 				// Clean up everything on start error
 				trySync({
 					try: () => newVad.destroy(),
-					mapErr: (error) =>
+					catch: (error) =>
 						VadRecorderServiceErr({
 							message: `Failed to destroy Voice Activity Detector. ${extractErrorMessage(error)}`,
 							context: { vadState },
@@ -143,11 +143,9 @@ export function createVadService() {
 			const vad = maybeVad;
 			const { error: destroyError } = trySync({
 				try: () => vad.destroy(),
-				mapErr: (error) =>
+				catch: (error) =>
 					VadRecorderServiceErr({
-						message: `Failed to stop Voice Activity Detector. ${
-							error instanceof Error ? error.message : 'Failed to stop VAD'
-						}`,
+						message: `Failed to stop Voice Activity Detector. ${extractErrorMessage(error)}`,
 						context: { vadState },
 						cause: error,
 					}),

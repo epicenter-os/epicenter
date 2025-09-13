@@ -2,25 +2,40 @@
 
 Welcome! We're excited you're interested in contributing to Epicenter. This guide will help you get up and running quickly.
 
+## Prerequisites
+
+- **Bun**: We use Bun as our JavaScript runtime and package manager
+  - Install from [bun.sh](https://bun.sh) if you don't have it
+  - The repo requires Bun 1.2.19 or newer (automatically enforced)
+
 ## Getting Started
 
 Epicenter is a monorepo containing multiple applications. The main application ready for contributions is **Whispering** (located in `apps/whispering`).
 
 ### Quick Setup
 
-1. **Clone and install dependencies**
+1. **Clone the repository**
    ```bash
    git clone https://github.com/epicenter-so/epicenter.git
    cd epicenter
-   bun install
    ```
 
-2. **Navigate to the Whispering app**
+2. **Install dependencies**
+   ```bash
+   bun install
+   ```
+   
+   > **Note**: If you see a version warning, run `bun upgrade` to update to the required version. The repository uses Bun 1.2.19 to ensure consistency across all contributors.
+   
+   > **Note**: Desktop app development requires external tools not installed by the command above. Install these manually.
+   > (For example: [Rust](https://www.rust-lang.org/tools/install) and [CMake](https://cmake.org/download/))
+
+3. **Navigate to the Whispering app**
    ```bash
    cd apps/whispering
    ```
 
-3. **Start development**
+4. **Start development**
    ```bash
    # Run both web and desktop mode
    bun dev
@@ -103,9 +118,26 @@ Examples:
 - `fix(sound): resolve audio import paths`
 - `docs: update contribution guidelines`
 
+## Troubleshooting
+
+### Version Mismatch Warning
+If you see a warning about Bun version mismatch:
+```bash
+# Update to the latest Bun version
+bun upgrade
+
+# Or install the specific version mentioned in the warning
+curl -fsSL https://bun.sh/install | bash -s "bun-v1.2.19"
+```
+
+### Installation Issues
+- Make sure you're in the repository root when running `bun install`
+- Clear the cache if you encounter issues: `bun pm cache rm`
+- On Windows, you may need to run your terminal as Administrator
+
 ## Getting Help
 
-- **Discord**: Join our community at [go.epicenter.so/discord](https://go.epicenter.so/discord)
+- **Discord**: Join our community at [go.epicenter.so/discord](https://go.epicenter.so/discord) and DM me to get started contributing
 - **Issues**: Check existing issues or create a new one
 - **Documentation**: Each app has its own README with specific details
 
@@ -129,7 +161,6 @@ We believe in:
 
 Feel free to:
 - Open an issue for discussion
-- Join our Discord and ask questions
-- Reach out directly at github@bradenwong.com
+- Join our Discord and DM me directly to get started
 
 Thank you for contributing to Epicenter! We're building something special together.

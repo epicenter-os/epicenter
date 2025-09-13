@@ -27,14 +27,18 @@ export function getSelectedTranscriptionService():
 export function isTranscriptionServiceConfigured(
 	service: TranscriptionService,
 ): boolean {
-	switch (service.type) {
-		case 'api': {
+	switch (service.location) {
+		case 'cloud': {
 			const apiKey = settings.value[service.apiKeyField];
 			return apiKey !== '';
 		}
-		case 'server': {
+		case 'self-hosted': {
 			const url = settings.value[service.serverUrlField];
 			return url !== '';
+		}
+		case 'local': {
+			const modelPath = settings.value[service.modelPathField];
+			return modelPath !== '';
 		}
 		default: {
 			return true;

@@ -15,7 +15,7 @@ export function createTunnelServiceNgrok(): TunnelService {
 				try: async () => {
 					await $`ngrok version`.quiet();
 				},
-				mapErr: (error) =>
+				catch: (error) =>
 					TunnelServiceErr({
 						message: `ngrok is not installed.\n\n${getInstallInstructions()}`,
 						cause: error,
@@ -109,7 +109,7 @@ export function createTunnelServiceNgrok(): TunnelService {
 
 					return tunnelUrl;
 				},
-				mapErr: (error) =>
+				catch: (error) =>
 					TunnelServiceErr({
 						message: `Failed to start ngrok tunnel on port ${port}: ${extractErrorMessage(error)}`,
 						cause: error,
@@ -125,7 +125,7 @@ export function createTunnelServiceNgrok(): TunnelService {
 						currentProcess = null;
 					}
 				},
-				mapErr: (error) =>
+				catch: (error) =>
 					TunnelServiceErr({
 						message: `Failed to stop tunnel: ${error instanceof Error ? error.message : String(error)}`,
 						cause: error,

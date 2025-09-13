@@ -1,4 +1,4 @@
-# epicenter.sh
+# Epicenter Assistant
 
 A web interface for self-hosted AI coding assistants. Connect to OpenCode servers running locally or tunneled through ngrok. Your code stays on your machine, even with cloud deployment.
 
@@ -51,7 +51,7 @@ bun preview
 
 ### Local Development
 
-Run both epicenter.sh and OpenCode locally:
+Run both Epicenter Assistant and OpenCode locally:
 
 ```bash
 bun dev
@@ -59,7 +59,7 @@ bun dev
 
 ### Cloud Deployment
 
-Deploy epicenter.sh to Cloudflare Pages while keeping OpenCode local:
+Deploy Epicenter Assistant to Cloudflare Pages while keeping OpenCode local:
 
 ```bash
 bun deploy
@@ -86,7 +86,7 @@ All data is stored locally on your machine:
 - **Assistant Configurations**: Stored in your browser's localStorage (key: `opencode-assistant-configs`)
 - **Session Data**: Managed by OpenCode on your local machine
 - **Chat History**: Persisted by OpenCode in your project directory
-- **No Cloud Database**: epicenter.sh uses no remote storage; all data stays local
+- **No Cloud Database**: Epicenter Assistant uses no remote storage; all data stays local
 
 This means:
 

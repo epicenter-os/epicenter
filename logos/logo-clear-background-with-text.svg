@@ -1,0 +1,19 @@
+<svg width="7680" height="8640" viewBox="0 0 400 450" xmlns="http://www.w3.org/2000/svg">
+  <!-- Import Google Font -->
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@600&amp;display=swap');
+    </style>
+  </defs>
+  
+  <!-- No background rect - this makes it transparent -->
+  
+  <!-- Top-left circle (gray) - drawn first so it appears behind -->
+  <circle cx="170" cy="170" r="100" fill="#cccccc" opacity="1"/>
+  
+  <!-- Bottom-right circle (pure white) - drawn second so it appears in front -->
+  <circle cx="230" cy="230" r="100" fill="#ffffff" opacity="1"/>
+  
+  <!-- Text "epicenter" below the circles -->
+  <text x="200" y="400" font-family="Manrope, sans-serif" font-size="60" font-weight="700" text-anchor="middle" fill="#ffffff">epicenter</text>
+</svg>

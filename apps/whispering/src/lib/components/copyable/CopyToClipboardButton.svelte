@@ -6,7 +6,7 @@
 	import { CheckIcon } from '@lucide/svelte';
 	import type { Snippet } from 'svelte';
 
-	const copyToClipboard = createMutation(rpc.clipboard.copyToClipboard.options);
+	const copyToClipboard = createMutation(rpc.text.copyToClipboard.options);
 
 	let {
 		children,
@@ -41,7 +41,7 @@
 		contentDescription: string;
 		viewTransitionName?: string;
 		class?: string;
-	} & Pick<Props, 'disabled' | 'variant' | 'size'> = $props();
+	} & Partial<Pick<Props, 'disabled' | 'variant' | 'size'>> = $props();
 
 	let hasCopied = $state(false);
 </script>

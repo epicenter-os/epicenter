@@ -86,7 +86,7 @@ export function resetLocalShortcutsToDefaultIfDuplicates(): boolean {
 		if (shortcut) {
 			if (localShortcuts.has(shortcut)) {
 				// If duplicates found, reset all local shortcuts to defaults
-				settings.resetShortcuts('local');
+				settings.resetLocalShortcuts();
 				rpc.notify.success.execute({
 					title: 'Shortcuts reset',
 					description:
@@ -119,7 +119,7 @@ export function resetGlobalShortcutsToDefaultIfDuplicates(): boolean {
 		if (shortcut) {
 			if (globalShortcuts.has(shortcut)) {
 				// If duplicates found, reset all global shortcuts to defaults
-				settings.resetShortcuts('global');
+				settings.resetGlobalShortcuts();
 				rpc.notify.success.execute({
 					title: 'Shortcuts reset',
 					description:

@@ -45,12 +45,16 @@
 <Popover.Root bind:open={notificationLog.isOpen}>
 	<Popover.Trigger>
 		{#snippet child({ props })}
+			{@const { class: propsClass, ...restProps } = props}
 			<WhisperingButton
 				tooltipContent="Notification History"
-				class="fixed bottom-4 right-4 z-50 hidden xs:inline-flex"
+				class={cn(
+					'fixed bottom-4 right-4 z-50 hidden xs:inline-flex',
+					propsClass,
+				)}
 				variant="outline"
 				size="icon"
-				{...props}
+				{...restProps}
 			>
 				<LogsIcon class="size-4" />
 			</WhisperingButton>

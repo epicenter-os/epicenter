@@ -28,7 +28,7 @@ async function hasExistingAudioPermission(): Promise<boolean> {
 				});
 				return permissionStatus;
 			},
-			mapErr: (error) =>
+			catch: (error) =>
 				DeviceStreamServiceErr({
 					message:
 						'We need permission to see your microphones. Check your browser settings and try again.',
@@ -68,7 +68,7 @@ export async function enumerateDevices(): Promise<
 				label: device.label,
 			}));
 		},
-		mapErr: (error) =>
+		catch: (error) =>
 			DeviceStreamServiceErr({
 				message:
 					'We need permission to see your microphones. Check your browser settings and try again.',
@@ -101,7 +101,7 @@ async function getStreamForDeviceIdentifier(
 			});
 			return stream;
 		},
-		mapErr: (error) =>
+		catch: (error) =>
 			DeviceStreamServiceErr({
 				message:
 					'Unable to connect to the selected microphone. This could be because the device is already in use by another application, has been disconnected, or lacks proper permissions. Please check that your microphone is connected, not being used elsewhere, and that you have granted microphone permissions.',
@@ -147,7 +147,7 @@ export async function getRecordingStream({
 		if (!getPreferredStreamError) {
 			return Ok({
 				stream: preferredStream,
-				deviceOutcome: { outcome: 'success' },
+				deviceOutcome: { outcome: 'success', deviceId: selectedDeviceId },
 			});
 		}
 
@@ -212,7 +212,7 @@ export async function getRecordingStream({
 			deviceOutcome: {
 				outcome: 'fallback',
 				reason: 'no-device-selected',
-				fallbackDeviceId: fallbackStreamData.deviceId,
+				deviceId: fallbackStreamData.deviceId,
 			},
 		});
 	}
@@ -221,7 +221,7 @@ export async function getRecordingStream({
 		deviceOutcome: {
 			outcome: 'fallback',
 			reason: 'preferred-device-unavailable',
-			fallbackDeviceId: fallbackStreamData.deviceId,
+			deviceId: fallbackStreamData.deviceId,
 		},
 	});
 }

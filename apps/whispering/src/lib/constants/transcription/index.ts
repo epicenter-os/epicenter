@@ -20,4 +20,4 @@ export {
 	TRANSCRIPTION_SERVICES,
 	TRANSCRIPTION_SERVICE_OPTIONS,
 	type TranscriptionService,
-} from './service-config';
+} from './transcription-services';

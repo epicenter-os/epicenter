@@ -39,7 +39,7 @@ export function createNotificationServiceWeb(): NotificationService {
 				//       notificationId,
 				//     });
 				//   },
-				//   mapErr: (error) => ({
+				//   catch: (error) => ({
 				//     name: 'NotificationServiceError' as const,
 				//     message: 'Failed to send extension notification',
 				//     cause: error,
@@ -80,7 +80,7 @@ export function createNotificationServiceWeb(): NotificationService {
 						};
 					}
 				},
-				mapErr: (error) =>
+				catch: (error) =>
 					NotificationServiceErr({
 						message: 'Failed to send browser notification',
 						context: { notificationId, title: options.title },

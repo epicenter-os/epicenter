@@ -24,7 +24,7 @@ export const createApps = (env: 'development' | 'production') => {
 		 */
 		AUDIO: {
 			URL: isProduction
-				? 'https://whispering.bradenwong.com'
+				? 'https://whispering.epicenter.so'
 				: 'http://localhost:1420',
 		},
 	} as const;
