@@ -5,6 +5,7 @@
 		LabeledInput,
 		LabeledSelect,
 		LabeledTextarea,
+		LabeledSwitch,
 	} from '$lib/components/labeled/index.js';
 	import {
 		CompressionBody,
@@ -137,6 +138,19 @@
 			renderOption={renderModelOption}
 		/>
 		<DeepgramApiKeyInput />
+
+		<LabeledSwitch
+			id="deepgram-mip-opt-out"
+			label="Model Training Opt-Out (may increase costs)"
+			bind:checked={
+				() => settings.value['transcription.deepgram.modelImprovementProgramOptOut'],
+				(v) =>
+					settings.updateKey(
+						'transcription.deepgram.modelImprovementProgramOptOut',
+						v,
+					)
+			}
+		/>
 	{:else if settings.value['transcription.selectedTranscriptionService'] === 'ElevenLabs'}
 		<LabeledSelect
 			id="elevenlabs-model"

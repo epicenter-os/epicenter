@@ -193,6 +193,10 @@ export const settingsSchema = z.object({
 		.string()
 		.transform((val) => val as (string & {}) | DeepgramModel['name'])
 		.default('nova-3' satisfies DeepgramModel['name']),
+	// Deepgram: Opt out of model improvement program
+	'transcription.deepgram.modelImprovementProgramOptOut': z
+		.boolean()
+		.default(false),
 	'transcription.speaches.baseUrl': z.string().default('http://localhost:8000'),
 	'transcription.speaches.modelId': z
 		.string()
