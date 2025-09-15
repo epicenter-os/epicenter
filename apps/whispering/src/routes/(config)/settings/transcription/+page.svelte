@@ -280,10 +280,10 @@
 			id="speaches-base-url"
 			label="Base URL"
 			placeholder="http://localhost:8000"
-			value={settings.value['transcription.speaches.baseUrl']}
-			oninput={({ currentTarget: { value } }) => {
-				settings.updateKey('transcription.speaches.baseUrl', value);
-			}}
+			bind:value={
+				() => settings.value['transcription.speaches.baseUrl'],
+				(value) => settings.updateKey('transcription.speaches.baseUrl', value)
+			}
 		>
 			{#snippet description()}
 				<p class="text-muted-foreground text-sm">
@@ -311,10 +311,10 @@
 			id="speaches-model-id"
 			label="Model ID"
 			placeholder="Systran/faster-distil-whisper-small.en"
-			value={settings.value['transcription.speaches.modelId']}
-			oninput={({ currentTarget: { value } }) => {
-				settings.updateKey('transcription.speaches.modelId', value);
-			}}
+			bind:value={
+				() => settings.value['transcription.speaches.modelId'],
+				(value) => settings.updateKey('transcription.speaches.modelId', value)
+			}
 		>
 			{#snippet description()}
 				<p class="text-muted-foreground text-sm">
@@ -395,10 +395,10 @@
 		max="1"
 		step="0.1"
 		placeholder="0"
-		value={settings.value['transcription.temperature']}
-		oninput={({ currentTarget: { value } }) => {
-			settings.updateKey('transcription.temperature', value);
-		}}
+		bind:value={
+			() => settings.value['transcription.temperature'],
+			(value) => settings.updateKey('transcription.temperature', value)
+		}
 		description={isPromptAndTemperatureSupported
 			? 'Temperature is not supported for local models (transcribe-rs)'
 			: "Controls randomness in the model's output. 0 is focused and deterministic, 1 is more creative."}
@@ -409,10 +409,10 @@
 		id="transcription-prompt"
 		label="System Prompt"
 		placeholder="e.g., This is an academic lecture about quantum physics with technical terms like 'eigenvalue' and 'Schrödinger'"
-		value={settings.value['transcription.prompt']}
-		oninput={({ currentTarget: { value } }) => {
-			settings.updateKey('transcription.prompt', value);
-		}}
+		bind:value={
+			() => settings.value['transcription.prompt'],
+			(value) => settings.updateKey('transcription.prompt', value)
+		}
 		description={isPromptAndTemperatureSupported
 			? 'System prompt is not supported for local models (transcribe-rs)'
 			: 'Helps transcription service (e.g., Whisper) better recognize specific terms, names, or context during initial transcription. Not for text transformations - use the Transformations tab for post-processing rules.'}

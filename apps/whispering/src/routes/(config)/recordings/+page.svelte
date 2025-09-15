@@ -374,8 +374,7 @@
 				placeholder="Filter transcripts..."
 				type="text"
 				class="w-full md:max-w-sm"
-				value={globalFilter}
-				oninput={(e) => (globalFilter = e.currentTarget.value)}
+				bind:value={globalFilter}
 			/>
 			<div class="flex w-full items-center justify-between gap-2">
 				{#if selectedRecordingRows.length > 0}

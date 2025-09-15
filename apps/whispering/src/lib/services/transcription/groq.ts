@@ -18,12 +18,6 @@ export const GROQ_MODELS = [
 			'Fast multilingual model with good accuracy (12% WER). Best price-to-performance ratio for multilingual applications.',
 		cost: '$0.04/hour',
 	},
-	{
-		name: 'distil-whisper-large-v3-en',
-		description:
-			'Fastest and most cost-effective model, but English-only. Recommended for English transcription where speed and cost are priorities.',
-		cost: '$0.02/hour',
-	},
 ] as const;
 
 export type GroqModel = (typeof GROQ_MODELS)[number];

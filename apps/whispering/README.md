@@ -68,8 +68,8 @@ Built with Svelte 5 and Tauri, so it's tiny (~22MB) and starts instantly. The co
 
 | Service | Cost per Hour | Light Use (20 min/day) | Moderate Use (1 hr/day) | Heavy Use (3 hr/day) | Traditional Tools |
 |---------|---------------|------------------------|-------------------------|----------------------|-------------------|
-| `distil-whisper-large-v3-en` (Groq) | $0.02 | $0.20/month | $0.60/month | $1.80/month | $15-30/month |
 | `whisper-large-v3-turbo` (Groq) | $0.04 | $0.40/month | $1.20/month | $3.60/month | $15-30/month |
+| `whisper-large-v3` (Groq) | $0.111 | $1.11/month | $3.33/month | $9.99/month | $15-30/month |
 | `gpt-4o-mini-transcribe` (OpenAI) | $0.18 | $1.80/month | $5.40/month | $16.20/month | $15-30/month |
 | Local | $0.00 | $0.00/month | $0.00/month | $0.00/month | $15-30/month |
 
@@ -227,7 +227,7 @@ Your audio never leaves your device. Works without internet. Free forever.
 I personally use Groq for most of my transcriptions because it's incredibly fast and accurate.
 
 > [!TIP]
-> **Why Groq?** Fastest transcription models, super accurate, generous free tier, and unbeatable pricing (as cheap as $0.02/hour using `distil-whisper-large-v3-en`)
+> **Why Groq?** Fastest transcription models, super accurate, generous free tier, and unbeatable pricing (as cheap as $0.04/hour using `whisper-large-v3-turbo`)
 
 #### Get Your Free API Key
 
@@ -240,7 +240,7 @@ I personally use Groq for most of my transcriptions because it's incredibly fast
 2. Click **Settings** (⚙️) → **Transcription**
 3. Select **Groq** from the dropdown
 4. Paste your API key in the API key field
-5. Choose a model (`distil-whisper-large-v3-en` is fastest and cheapest)
+5. Choose a model (`whisper-large-v3-turbo` is fastest and cheapest)
 
 #### Test Your Setup
 
@@ -328,7 +328,7 @@ Choose from multiple transcription providers based on your needs for speed, accu
 
 #### 🚀 Groq (Recommended)
 - **API Key:** [console.groq.com/keys](https://console.groq.com/keys)
-- **Models:** `distil-whisper-large-v3-en` ($0.02/hr), `whisper-large-v3-turbo` ($0.04/hr), `whisper-large-v3` ($0.06/hr)
+- **Models:** `whisper-large-v3-turbo` ($0.04/hr), `whisper-large-v3` ($0.111/hr)
 - **Why:** Fastest, cheapest, generous free tier
 
 #### 🎯 OpenAI
