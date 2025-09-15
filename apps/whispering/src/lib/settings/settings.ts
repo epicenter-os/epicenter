@@ -52,6 +52,7 @@ import {
 } from '$lib/services/recorder/ffmpeg';
 import { type ZodBoolean, type ZodString, z } from 'zod';
 import type { DeepgramModel } from '$lib/services/transcription/deepgram';
+import type { MistralModel } from '$lib/services/transcription/mistral';
 
 /**
  * The main settings schema that defines all application settings.
@@ -193,6 +194,10 @@ export const settingsSchema = z.object({
 		.string()
 		.transform((val) => val as (string & {}) | DeepgramModel['name'])
 		.default('nova-3' satisfies DeepgramModel['name']),
+	'transcription.mistral.model': z
+		.string()
+		.transform((val) => val as (string & {}) | MistralModel['name'])
+		.default('voxtral-mini-latest' satisfies MistralModel['name']),
 	'transcription.speaches.baseUrl': z.string().default('http://localhost:8000'),
 	'transcription.speaches.modelId': z
 		.string()
@@ -215,6 +220,7 @@ export const settingsSchema = z.object({
 	'apiKeys.google': z.string().default(''),
 	'apiKeys.deepgram': z.string().default(''),
 	'apiKeys.elevenlabs': z.string().default(''),
+	'apiKeys.mistral': z.string().default(''),
 	'apiKeys.openrouter': z.string().default(''),
 
 	// Analytics settings

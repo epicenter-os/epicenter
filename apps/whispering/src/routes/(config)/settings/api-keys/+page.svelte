@@ -4,6 +4,8 @@
 		ElevenLabsApiKeyInput,
 		GoogleApiKeyInput,
 		GroqApiKeyInput,
+		MistralApiKeyInput,
+		DeepgramApiKeyInput,
 		OpenAiApiKeyInput,
 		OpenRouterApiKeyInput,
 	} from '$lib/components/settings';
@@ -29,4 +31,6 @@
 	<GroqApiKeyInput />
 	<GoogleApiKeyInput />
 	<ElevenLabsApiKeyInput />
+	<DeepgramApiKeyInput />
+	<MistralApiKeyInput />
 </div>

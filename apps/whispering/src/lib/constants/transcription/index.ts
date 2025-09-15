@@ -16,6 +16,11 @@ export {
 } from '$lib/services/transcription/deepgram';
 
 export {
+	MISTRAL_TRANSCRIPTION_MODELS,
+	type MistralModel,
+} from '$lib/services/transcription/mistral';
+
+export {
 	TRANSCRIPTION_SERVICE_IDS,
 	TRANSCRIPTION_SERVICES,
 	TRANSCRIPTION_SERVICE_OPTIONS,
